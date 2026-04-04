@@ -9,13 +9,20 @@
 }
 
 .countBar {
-  padding: 0.6rem 1rem;
+  padding: 0.5rem 1rem;
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--text-muted, #6b7280);
-  background: var(--bg, #f9fafb);
+  background: #f9fafb;
   border-bottom: 1px solid var(--border, #e5e7eb);
   flex-shrink: 0;
+}
+
+.gemsHeader {
+  color: #2563eb;
+  font-weight: 600;
+  background: #eff6ff;
+  border-bottom-color: #bfdbfe;
 }
 
 .list {
@@ -28,4 +35,81 @@
   color: var(--text-muted, #9ca3af);
   font-size: 0.875rem;
   text-align: center;
+}
+
+/* ── Hidden Gems card ─────────────────────────────────────────────────── */
+
+.gemCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.12s;
+}
+
+.gemCard:hover {
+  background: #f9fafb;
+}
+
+.gemTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gemCategory {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.gemScore {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+}
+
+.gemName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-h, #111827);
+  line-height: 1.3;
+}
+
+.gemMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.1rem;
+}
+
+.gemRating {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.gemCity {
+  font-size: 0.75rem;
+  color: var(--text-muted, #9ca3af);
+  margin-left: auto;
+}
+
+.gemDeal {
+  align-self: flex-start;
+  background: #10b981;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 10px;
+  text-transform: uppercase;
 }

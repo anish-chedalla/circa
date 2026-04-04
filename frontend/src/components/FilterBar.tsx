@@ -1,6 +1,6 @@
 /**
  * Filter bar for the Map Discovery page.
- * Provides category, city, min-rating, has-deals, sort-by, and search controls.
+ * Provides category, city, min-rating, has-deals, sort-by, search, and Hidden Gems toggle.
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -11,7 +11,7 @@ import styles from './FilterBar.module.css';
 const CITIES = ['All Cities', 'Phoenix', 'Scottsdale', 'Tempe', 'Mesa', 'Chandler', 'Tucson', 'Oro Valley', 'Marana'];
 const SORT_OPTIONS = [
   { value: 'name', label: 'Name' },
-  { value: 'rating', label: 'Highest Rated' },
+  { value: 'rating', label: 'Top Rated' },
   { value: 'reviews', label: 'Most Reviewed' },
 ];
 
@@ -22,12 +22,16 @@ interface FilterBarProps {
   categories: string[];
   /** Called whenever any filter value changes. */
   onFilterChange: (updated: BusinessFilters) => void;
+  /** Whether Hidden Gems mode is active. */
+  showGems: boolean;
+  /** Toggle Hidden Gems mode on/off. */
+  onToggleGems: () => void;
 }
 
 /**
  * Renders horizontal filter controls for the map discovery page.
  */
-export default function FilterBar({ filters, categories, onFilterChange }: FilterBarProps) {
+export default function FilterBar({ filters, categories, onFilterChange, showGems, onToggleGems }: FilterBarProps) {
   const [searchInput, setSearchInput] = useState(filters.search);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -113,6 +117,16 @@ export default function FilterBar({ filters, categories, onFilterChange }: Filte
           <option key={o.value} value={o.value}>{o.label}</option>
         ))}
       </select>
+
+      <button
+        type="button"
+        className={`${styles.gemsToggle} ${showGems ? styles.gemsActive : ''}`}
+        onClick={onToggleGems}
+        title="Show algorithmically scored hidden gem businesses"
+        aria-pressed={showGems}
+      >
+        ✦ Hidden Gems
+      </button>
     </div>
   );
 }

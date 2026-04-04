@@ -2,9 +2,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: var(--surface, #ffffff);
+  gap: 0.6rem;
+  padding: 0.5rem 1rem;
+  background: #f9fafb;
   border-bottom: 1px solid var(--border, #e5e7eb);
   position: sticky;
   top: 60px;
@@ -12,28 +12,28 @@
 }
 
 .search {
-  flex: 1 1 200px;
-  min-width: 160px;
-  padding: 0.4rem 0.75rem;
+  flex: 1 1 180px;
+  min-width: 140px;
+  padding: 0.35rem 0.7rem;
   border: 1px solid var(--border, #e5e7eb);
   border-radius: 6px;
-  font-size: 0.875rem;
-  background: var(--bg, #f9fafb);
+  font-size: 0.85rem;
+  background: #ffffff;
   color: var(--text-h, #111827);
   outline: none;
 }
 
 .search:focus {
   border-color: var(--accent, #2563eb);
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
 }
 
 .select {
-  padding: 0.4rem 0.75rem;
+  padding: 0.35rem 0.7rem;
   border: 1px solid var(--border, #e5e7eb);
   border-radius: 6px;
-  font-size: 0.875rem;
-  background: var(--bg, #f9fafb);
+  font-size: 0.85rem;
+  background: #ffffff;
   color: var(--text-h, #111827);
   cursor: pointer;
   outline: none;
@@ -46,14 +46,14 @@
 .sliderLabel {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
+  gap: 0.4rem;
+  font-size: 0.85rem;
   color: var(--text-h, #374151);
   white-space: nowrap;
 }
 
 .slider {
-  width: 100px;
+  width: 90px;
   accent-color: var(--accent, #2563eb);
   cursor: pointer;
 }
@@ -61,8 +61,8 @@
 .checkLabel {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.875rem;
+  gap: 0.35rem;
+  font-size: 0.85rem;
   color: var(--text-h, #374151);
   cursor: pointer;
   white-space: nowrap;
@@ -70,7 +70,37 @@
 
 .checkLabel input[type='checkbox'] {
   accent-color: var(--accent, #2563eb);
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
   cursor: pointer;
+}
+
+.gemsToggle {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: #ffffff;
+  color: #6b7280;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  margin-left: auto;
+}
+
+.gemsToggle:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.gemsActive {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.gemsActive:hover {
+  background: #1d4ed8;
+  color: #ffffff;
 }

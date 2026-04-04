@@ -1,6 +1,7 @@
 /**
  * Map Discovery page — the primary demo page.
- * Shows an interactive Leaflet map, filter bar, business sidebar, and Hidden Gems section.
+ * Shows an interactive Leaflet map, filter bar, and business sidebar.
+ * Hidden Gems mode is toggled from the filter bar and shown in the sidebar.
  */
 
 import { useEffect, useState, useCallback } from 'react';
@@ -11,7 +12,6 @@ import type { ApiResponse, Business, BusinessFilters } from '../types';
 import FilterBar from '../components/FilterBar';
 import MapView from '../components/MapView';
 import BusinessSidebar from '../components/BusinessSidebar';
-import HiddenGems from '../components/HiddenGems';
 import styles from './MapDiscovery.module.css';
 
 const DEFAULT_FILTERS: BusinessFilters = {
@@ -37,7 +37,7 @@ function buildQuery(filters: BusinessFilters): string {
 }
 
 /**
- * Renders the interactive Map Discovery page with filters, sidebar, and Hidden Gems.
+ * Renders the interactive Map Discovery page with filters, sidebar, and Hidden Gems toggle.
  */
 export default function MapDiscovery() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
@@ -46,6 +46,7 @@ export default function MapDiscovery() {
   const [filters, setFilters] = useState<BusinessFilters>(DEFAULT_FILTERS);
   const [loading, setLoading] = useState(true);
   const [gemsLoading, setGemsLoading] = useState(true);
+  const [showGems, setShowGems] = useState(false);
 
   const fetchBusinesses = useCallback(async (f: BusinessFilters) => {
     setLoading(true);
@@ -79,12 +80,19 @@ export default function MapDiscovery() {
         filters={filters}
         categories={categories}
         onFilterChange={setFilters}
+        showGems={showGems}
+        onToggleGems={() => setShowGems((prev) => !prev)}
       />
       <div className={styles.main}>
         <MapView businesses={businesses} />
-        <BusinessSidebar businesses={businesses} loading={loading} />
+        <BusinessSidebar
+          businesses={businesses}
+          loading={loading}
+          gems={gems}
+          gemsLoading={gemsLoading}
+          showGems={showGems}
+        />
       </div>
-      <HiddenGems gems={gems} loading={gemsLoading} />
     </div>
   );
 }
