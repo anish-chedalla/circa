@@ -1,7 +1,7 @@
 /**
  * Map Discovery page — the primary demo page.
- * Shows an interactive Leaflet map, filter bar, and business sidebar.
- * Hidden Gems mode is toggled from the filter bar and shown in the sidebar.
+ * Injects the FilterBar into the Navbar slot so filters live in the header.
+ * Shows an interactive Leaflet map and business sidebar.
  */
 
 import { useEffect, useState, useCallback } from 'react';
@@ -12,6 +12,7 @@ import type { ApiResponse, Business, BusinessFilters } from '../types';
 import FilterBar from '../components/FilterBar';
 import MapView from '../components/MapView';
 import BusinessSidebar from '../components/BusinessSidebar';
+import { useNavbarSlot } from '../context/NavbarSlotContext';
 import styles from './MapDiscovery.module.css';
 
 const DEFAULT_FILTERS: BusinessFilters = {
@@ -37,7 +38,8 @@ function buildQuery(filters: BusinessFilters): string {
 }
 
 /**
- * Renders the interactive Map Discovery page with filters, sidebar, and Hidden Gems toggle.
+ * Renders the interactive Map Discovery page.
+ * Filter controls are injected into the Navbar via NavbarSlotContext.
  */
 export default function MapDiscovery() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
@@ -47,6 +49,7 @@ export default function MapDiscovery() {
   const [loading, setLoading] = useState(true);
   const [gemsLoading, setGemsLoading] = useState(true);
   const [showGems, setShowGems] = useState(false);
+  const { setSlot } = useNavbarSlot();
 
   const fetchBusinesses = useCallback(async (f: BusinessFilters) => {
     setLoading(true);
@@ -74,8 +77,9 @@ export default function MapDiscovery() {
       .catch((err) => { logger.error('Failed to fetch hidden gems', err); setGemsLoading(false); });
   }, []);
 
-  return (
-    <div className={styles.page}>
+  // Inject FilterBar into the Navbar slot; update when state changes; clear on unmount
+  useEffect(() => {
+    setSlot(
       <FilterBar
         filters={filters}
         categories={categories}
@@ -83,6 +87,15 @@ export default function MapDiscovery() {
         showGems={showGems}
         onToggleGems={() => setShowGems((prev) => !prev)}
       />
+    );
+  }, [filters, categories, showGems, setSlot]);
+
+  useEffect(() => {
+    return () => setSlot(null);
+  }, [setSlot]);
+
+  return (
+    <div className={styles.page}>
       <div className={styles.main}>
         <MapView businesses={businesses} />
         <BusinessSidebar

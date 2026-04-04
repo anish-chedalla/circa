@@ -4,43 +4,42 @@
   align-items: center;
   gap: 0.6rem;
   padding: 0.5rem 1rem;
-  background: #f9fafb;
-  border-bottom: 1px solid var(--border, #e5e7eb);
-  position: sticky;
-  top: 60px;
-  z-index: 100;
 }
 
 .search {
   flex: 1 1 180px;
   min-width: 140px;
   padding: 0.35rem 0.7rem;
-  border: 1px solid var(--border, #e5e7eb);
+  border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 0.85rem;
   background: #ffffff;
-  color: var(--text-h, #111827);
+  color: #111827;
   outline: none;
 }
 
+.search::placeholder {
+  color: #9ca3af;
+}
+
 .search:focus {
-  border-color: var(--accent, #2563eb);
+  border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
 }
 
 .select {
   padding: 0.35rem 0.7rem;
-  border: 1px solid var(--border, #e5e7eb);
+  border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 0.85rem;
   background: #ffffff;
-  color: var(--text-h, #111827);
+  color: #111827;
   cursor: pointer;
   outline: none;
 }
 
 .select:focus {
-  border-color: var(--accent, #2563eb);
+  border-color: #2563eb;
 }
 
 .sliderLabel {
@@ -48,13 +47,13 @@
   align-items: center;
   gap: 0.4rem;
   font-size: 0.85rem;
-  color: var(--text-h, #374151);
+  color: #374151;
   white-space: nowrap;
 }
 
 .slider {
   width: 90px;
-  accent-color: var(--accent, #2563eb);
+  accent-color: #2563eb;
   cursor: pointer;
 }
 
@@ -63,13 +62,13 @@
   align-items: center;
   gap: 0.35rem;
   font-size: 0.85rem;
-  color: var(--text-h, #374151);
+  color: #374151;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .checkLabel input[type='checkbox'] {
-  accent-color: var(--accent, #2563eb);
+  accent-color: #2563eb;
   width: 14px;
   height: 14px;
   cursor: pointer;
@@ -82,7 +81,7 @@
   font-size: 0.85rem;
   font-weight: 500;
   background: #ffffff;
-  color: #6b7280;
+  color: #374151;
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.15s, color 0.15s, border-color 0.15s;

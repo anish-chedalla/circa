@@ -10,6 +10,7 @@ import { Routes, Route } from 'react-router-dom';
 import LoadingSpinner from './components/LoadingSpinner';
 
 import { AuthProvider } from './context/AuthContext';
+import { NavbarSlotProvider } from './context/NavbarSlotContext';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -43,6 +44,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
  */
 export default function App() {
   return (
+    <NavbarSlotProvider>
     <AuthProvider>
       <Navbar />
       <Suspense fallback={<LoadingSpinner />}>
@@ -94,5 +96,6 @@ export default function App() {
         </Routes>
       </Suspense>
     </AuthProvider>
+    </NavbarSlotProvider>
   );
 }

@@ -1,15 +1,23 @@
 .nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 1.5rem;
-  height: 60px;
   background: #ffffff;
   border-bottom: 1px solid #e5e7eb;
   position: sticky;
   top: 0;
   z-index: 500;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  height: 56px;
+}
+
+.slotRow {
+  border-top: 1px solid #e5e7eb;
+  background: #f8fafc;
 }
 
 .brand {
