@@ -1,0 +1,157 @@
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.email {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-h, #111827);
+}
+
+.roleBadge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.6rem;
+  border-radius: 10px;
+  text-transform: capitalize;
+  align-self: flex-start;
+}
+
+.roleUser { background: #eff6ff; color: #1d4ed8; }
+.roleOwner { background: #f0fdf4; color: #15803d; }
+.roleAdmin { background: #fef2f2; color: #b91c1c; }
+
+.section {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-h, #111827);
+  margin: 0 0 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.count {
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.1rem 0.5rem;
+  border-radius: 10px;
+}
+
+.fallbackNote {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--text-muted, #9ca3af);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+
+.favItem {
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.unfavBtn {
+  padding: 0.4rem;
+  background: #fef2f2;
+  color: #ef4444;
+  border: none;
+  border-top: 1px solid #fecaca;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s;
+}
+
+.unfavBtn:hover {
+  background: #fee2e2;
+}
+
+.status {
+  font-size: 0.9rem;
+  color: var(--text-muted, #9ca3af);
+  font-style: italic;
+}
+
+.link {
+  color: var(--accent, #2563eb);
+  text-decoration: underline;
+}
+
+.accountInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.accountLine {
+  font-size: 0.9rem;
+  color: var(--text-body, #374151);
+  margin: 0;
+}
+
+.dashboardLink {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent, #2563eb);
+  text-decoration: none;
+}
+
+.dashboardLink:hover {
+  text-decoration: underline;
+}

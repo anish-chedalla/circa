@@ -1,0 +1,44 @@
+.card {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #065f46;
+}
+
+.expiringSoon {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #f59e0b;
+  color: #fff;
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.description {
+  font-size: 0.85rem;
+  color: #047857;
+  margin: 0 0 0.35rem;
+  line-height: 1.4;
+}
+
+.expiry {
+  font-size: 0.75rem;
+  color: #6b7280;
+}

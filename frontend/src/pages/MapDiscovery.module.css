@@ -1,0 +1,20 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* On narrow screens, stack the sidebar below the map */
+@media (max-width: 768px) {
+  .main {
+    flex-direction: column;
+  }
+}

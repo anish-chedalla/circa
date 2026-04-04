@@ -1,0 +1,114 @@
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  height: 60px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.brand {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #111827;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  justify-content: center;
+}
+
+.navLink {
+  display: inline-block;
+  padding: 0.35rem 0.7rem;
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.navLink:hover {
+  color: #111827;
+  background: #f3f4f6;
+}
+
+.active {
+  color: #2563eb;
+  background: #eff6ff;
+  font-weight: 600;
+}
+
+.registerBtn {
+  background: #2563eb;
+  color: #ffffff !important;
+  padding: 0.35rem 0.9rem;
+}
+
+.registerBtn:hover {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.roleBadge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+}
+
+.role_user {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.role_business_owner {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.role_admin {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.logoutBtn {
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #374151;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.logoutBtn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: #fef2f2;
+}

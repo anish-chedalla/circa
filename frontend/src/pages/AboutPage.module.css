@@ -1,0 +1,153 @@
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.hero {
+  text-align: center;
+  padding: 2.5rem 1rem 2rem;
+  margin-bottom: 1rem;
+}
+
+.heroTitle {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--text-h, #111827);
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.heroSubtitle {
+  font-size: 1.05rem;
+  color: var(--text-muted, #6b7280);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-h, #111827);
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #eff6ff;
+}
+
+.text {
+  font-size: 0.925rem;
+  color: var(--text-body, #374151);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.featureCard {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.featureCard:last-child {
+  margin-bottom: 0;
+}
+
+.featureName {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e40af;
+  margin: 0 0 0.6rem;
+}
+
+.formula {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.88rem;
+  background: #eff6ff;
+  color: #1e40af;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  border-left: 3px solid #2563eb;
+}
+
+.stackTable {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stackRow {
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr;
+  gap: 0.75rem;
+  align-items: baseline;
+  font-size: 0.875rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.stackRow:last-child {
+  border-bottom: none;
+}
+
+.stackLayer {
+  font-weight: 700;
+  color: var(--text-h, #111827);
+}
+
+.stackTech {
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.stackNote {
+  color: var(--text-muted, #9ca3af);
+  font-size: 0.8rem;
+}
+
+.accountsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.accountCard {
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.account_blue { background: #eff6ff; border: 1px solid #bfdbfe; }
+.account_green { background: #f0fdf4; border: 1px solid #bbf7d0; }
+.account_red { background: #fef2f2; border: 1px solid #fecaca; }
+
+.accountRole {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #374151;
+}
+
+.accountCreds {
+  font-size: 0.85rem;
+  color: #111827;
+  font-family: 'Courier New', Courier, monospace;
+}

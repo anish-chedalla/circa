@@ -1,0 +1,35 @@
+.container {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.star {
+  color: #d1d5db;
+  line-height: 1;
+  user-select: none;
+}
+
+.filled {
+  color: #f59e0b;
+}
+
+.half {
+  position: relative;
+  color: #d1d5db;
+}
+
+.half::before {
+  content: '\2605';
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  width: 50%;
+  color: #f59e0b;
+}
+
+/* Size presets */
+.sm { font-size: 0.8rem; }
+.md { font-size: 1rem; }
+.lg { font-size: 1.25rem; }

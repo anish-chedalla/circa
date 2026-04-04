@@ -1,0 +1,79 @@
+.card {
+  display: block;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.card:hover {
+  background: var(--surface-hover, #f3f4f6);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+
+.name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-h, #111827);
+  line-height: 1.3;
+}
+
+.dealBadge {
+  flex-shrink: 0;
+  background: #10b981;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.category {
+  font-size: 0.78rem;
+  color: var(--accent, #2563eb);
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.rating {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-h, #374151);
+}
+
+.reviewCount {
+  font-size: 0.78rem;
+  color: var(--text-muted, #9ca3af);
+}
+
+.city {
+  font-size: 0.78rem;
+  color: var(--text-muted, #9ca3af);
+  margin-left: auto;
+}
+
+.description {
+  font-size: 0.78rem;
+  color: var(--text-muted, #6b7280);
+  margin-top: 0.3rem;
+  line-height: 1.4;
+}

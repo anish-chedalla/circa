@@ -1,0 +1,134 @@
+.page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-h, #111827);
+  margin: 0 0 0.5rem;
+}
+
+.subtitle {
+  font-size: 0.925rem;
+  color: var(--text-muted, #6b7280);
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+
+.search {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 10px;
+  font-size: 1rem;
+  background: var(--surface, #ffffff);
+  color: var(--text-h, #111827);
+  outline: none;
+  margin-bottom: 1.25rem;
+  box-sizing: border-box;
+}
+
+.search:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.status {
+  font-size: 0.9rem;
+  color: var(--text-muted, #9ca3af);
+  font-style: italic;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bizRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.bizInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.bizName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-h, #111827);
+}
+
+.bizMeta {
+  font-size: 0.8rem;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.bizAddress {
+  font-size: 0.78rem;
+  color: var(--text-muted, #9ca3af);
+}
+
+.bizAction {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.claimBtn {
+  padding: 0.45rem 1rem;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.claimBtn:hover {
+  background: #1d4ed8;
+}
+
+.successMsg {
+  font-size: 0.8rem;
+  color: #15803d;
+  background: #f0fdf4;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #bbf7d0;
+  text-align: right;
+  max-width: 220px;
+}
+
+.errorMsg {
+  font-size: 0.8rem;
+  color: #b91c1c;
+  background: #fef2f2;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+  text-align: right;
+  max-width: 220px;
+}
