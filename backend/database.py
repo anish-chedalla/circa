@@ -20,7 +20,13 @@ if not DATABASE_URL:
 if DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+# Supabase uses transaction pooling (Supavisor) which does not support
+# prepared statements — disable them to prevent DuplicatePreparedStatement errors.
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    connect_args={"prepare_threshold": None},
+)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
