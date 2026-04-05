@@ -21,6 +21,33 @@ const steps = [
   },
 ];
 
+const teamMembers = [
+  {
+    name: 'Anish Chedalla',
+    title: 'Founder',
+    image:
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=900&h=900&fit=crop',
+    quote:
+      'We built Circa because we love helping people discover and support the local communities around them.',
+  },
+  {
+    name: 'Adhyyan Ranjan',
+    title: 'Founder',
+    image:
+      'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=900&h=900&fit=crop',
+    quote:
+      'We built Circa because we love helping people discover and support the local communities around them.',
+  },
+  {
+    name: 'Gauri Gulati',
+    title: 'Founder',
+    image:
+      'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=900&h=900&fit=crop',
+    quote:
+      'We built Circa because we love helping people discover and support the local communities around them.',
+  },
+];
+
 export default function AboutPage() {
   return (
     <main className={styles.page}>
@@ -87,6 +114,30 @@ export default function AboutPage() {
                 communities.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.teamSection} aria-labelledby="team-title">
+        <div className={styles.container}>
+          <div className={styles.sectionIntro}>
+            <p className={styles.kicker}>Our Team</p>
+            <div className={styles.kickerUnderline} aria-hidden="true" />
+          </div>
+
+          <h2 id="team-title" className={styles.teamTitle}>
+            The Builders Behind Circa
+          </h2>
+
+          <div className={styles.teamGrid}>
+            {teamMembers.map((member) => (
+              <article key={member.name} className={styles.teamCard}>
+                <img src={member.image} alt={member.name} className={styles.teamImage} />
+                <h3 className={styles.memberName}>{member.name}</h3>
+                <p className={styles.memberTitle}>{member.title}</p>
+                <p className={styles.memberQuote}>{member.quote}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
