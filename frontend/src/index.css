@@ -1,5 +1,6 @@
 /* Leaflet base styles */
 @import 'leaflet/dist/leaflet.css';
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap');
 
 /* ------------------------------------------------------------------ */
 /*  Global reset & base styles                                        */
@@ -25,7 +26,8 @@
   --accent: #2563eb;
   --accent-hover: #1d4ed8;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: 'Source Sans 3', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --serif: 'Cormorant Garamond', Georgia, serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font-family: var(--sans);
