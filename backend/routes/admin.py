@@ -12,6 +12,10 @@ from backend.models.business import Business
 from backend.models.business_claim import BusinessClaim
 from backend.models.review import Review
 from backend.models.user import User
+from backend.services.google_places_enrichment import (
+    enrich_business_by_id,
+    enrich_multiple_businesses,
+)
 from backend.utils.auth import get_current_user, require_role
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -124,6 +128,40 @@ def list_users(db: Session = Depends(get_db), _=_admin):
         ],
         "error": None,
     }
+
+
+# ---------------------------------------------------------------------------
+# Google enrichment
+# ---------------------------------------------------------------------------
+
+@router.post("/businesses/{business_id}/enrich-google")
+def enrich_business_google(
+    business_id: int,
+    db: Session = Depends(get_db),
+    _=_admin,
+):
+    """Enrich one business with Google Places metadata and cache it."""
+    try:
+        data = enrich_business_by_id(db, business_id)
+    except ValueError as exc:
+        return JSONResponse(status_code=404, content={"data": None, "error": str(exc)})
+    except Exception as exc:
+        return JSONResponse(status_code=400, content={"data": None, "error": str(exc)})
+    return {"data": data, "error": None}
+
+
+@router.post("/businesses/enrich-google")
+def enrich_businesses_google(
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+    _=_admin,
+):
+    """Enrich a batch of businesses with Google Places metadata."""
+    try:
+        data = enrich_multiple_businesses(db, limit=limit)
+    except Exception as exc:
+        return JSONResponse(status_code=400, content={"data": None, "error": str(exc)})
+    return {"data": data, "error": None}
 
 
 # ---------------------------------------------------------------------------

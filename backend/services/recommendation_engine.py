@@ -220,8 +220,15 @@ def _serialize_biz(biz: Business, active_deal_ids: set[int], score: float) -> di
         "city": biz.city,
         "lat": biz.lat,
         "lng": biz.lng,
+        "description": biz.description,
         "avg_rating": biz.avg_rating,
         "review_count": biz.review_count,
         "has_active_deals": biz.id in active_deal_ids,
+        "google_place_id": biz.google_place_id,
+        "google_photo_url": biz.google_photo_url,
+        "google_summary": biz.google_summary,
+        "google_last_synced_at": (
+            biz.google_last_synced_at.isoformat() if biz.google_last_synced_at else None
+        ),
         "score": score,
     }

@@ -1,7 +1,3 @@
-/**
- * Business Detail page — shows full info, reviews, deals, bookmark, and review modal.
- */
-
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
@@ -17,9 +13,6 @@ import MiniMap from '../components/MiniMap';
 import ReviewModal from '../components/ReviewModal';
 import styles from './BusinessDetail.module.css';
 
-/**
- * Renders a full business detail view with map, reviews, deals, and bookmark.
- */
 export default function BusinessDetail() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -34,16 +27,24 @@ export default function BusinessDetail() {
     setLoading(true);
     get<ApiResponse<BusinessDetailType>>(`/businesses/${id}`)
       .then((resp) => {
-        if (!resp.data) { setNotFound(true); return; }
+        if (!resp.data) {
+          setNotFound(true);
+          return;
+        }
         setBusiness(resp.data);
       })
-      .catch((err) => { logger.error('Failed to fetch business', err); setNotFound(true); })
+      .catch((err) => {
+        logger.error('Failed to fetch business', err);
+        setNotFound(true);
+      })
       .finally(() => setLoading(false));
   }, [id]);
 
-  /** Toggle favorite status for the business. */
   async function toggleFavorite() {
-    if (!user) { window.location.href = '/login'; return; }
+    if (!user) {
+      window.location.href = '/login';
+      return;
+    }
     try {
       if (isFavorited) {
         await del(`/favorites/${id}`);
@@ -57,95 +58,124 @@ export default function BusinessDetail() {
     }
   }
 
-  /** Refresh reviews after a new review is submitted. */
   function handleReviewSubmitted() {
     setShowReviewModal(false);
     if (!id) return;
     get<ApiResponse<BusinessDetailType>>(`/businesses/${id}`)
-      .then((resp) => { if (resp.data) setBusiness(resp.data); })
+      .then((resp) => {
+        if (resp.data) setBusiness(resp.data);
+      })
       .catch((err) => logger.error('Failed to refresh business', err));
   }
 
-  if (loading) return <div className={styles.status}>Loading…</div>;
+  if (loading) return <div className={styles.status}>Loading...</div>;
+
   if (notFound || !business) {
     return (
       <div className={styles.status}>
         <h2>Business not found</h2>
-        <Link to="/" className={styles.backLink}>← Back to map</Link>
+        <Link to="/" className={styles.backLink}>Back to map</Link>
       </div>
     );
   }
 
+  const heroImage = business.google_photo_url || '/about/small-business.jpg';
+  const summary = business.google_summary || business.description;
+
   return (
-    <div className={styles.page}>
-      <Link to="/" className={styles.backLink}>← Back to map</Link>
+    <main className={styles.page}>
+      <section className={styles.hero}>
+        <img src={heroImage} alt={business.name} className={styles.heroImage} />
+        <div className={styles.heroOverlay} />
+        <div className={styles.heroContent}>
+          <Link to="/" className={styles.backLink}>Back to map</Link>
+          <div className={styles.titleRow}>
+            <h1 className={styles.name}>{business.name}</h1>
+            <button
+              className={`${styles.bookmarkBtn} ${isFavorited ? styles.bookmarked : ''}`}
+              onClick={toggleFavorite}
+              title={isFavorited ? 'Remove from favorites' : 'Save to favorites'}
+            >
+              {isFavorited ? 'Saved' : 'Save'}
+            </button>
+          </div>
+          <p className={styles.meta}>
+            {business.category} | {business.city}
+          </p>
+          <div className={styles.ratingRow}>
+            <StarRating rating={business.avg_rating} size="1.1rem" />
+            <span>{business.avg_rating.toFixed(1)}</span>
+            <span>({business.review_count} reviews)</span>
+          </div>
+          {summary && <p className={styles.summary}>{summary}</p>}
+        </div>
+      </section>
 
-      <div className={styles.layout}>
-        <div className={styles.left}>
-          <header className={styles.header}>
-            <div className={styles.titleRow}>
-              <h1 className={styles.name}>{business.name}</h1>
-              <button
-                className={`${styles.bookmarkBtn} ${isFavorited ? styles.bookmarked : ''}`}
-                onClick={toggleFavorite}
-                title={isFavorited ? 'Remove from favorites' : 'Save to favorites'}
-              >
-                {isFavorited ? '♥' : '♡'}
-              </button>
-            </div>
-            <span className={styles.category}>{business.category}</span>
-            <div className={styles.ratingRow}>
-              <StarRating rating={business.avg_rating} size="1.1rem" />
-              <span className={styles.ratingNum}>{business.avg_rating.toFixed(1)}</span>
-              <span className={styles.reviewCount}>({business.review_count} reviews)</span>
-            </div>
-          </header>
+      <section className={styles.contentSection}>
+        <div className={styles.container}>
+          <div className={styles.layout}>
+            <div className={styles.left}>
+              <section className={styles.section}>
+                <h2 className={styles.sectionTitle}>Details</h2>
+                {business.address && (
+                  <p className={styles.infoLine}>
+                    <span className={styles.label}>Address:</span> {business.address}, {business.city} {business.zip}
+                  </p>
+                )}
+                {business.phone && (
+                  <p className={styles.infoLine}>
+                    <span className={styles.label}>Phone:</span> <a href={`tel:${business.phone}`}>{business.phone}</a>
+                  </p>
+                )}
+                {business.website && (
+                  <p className={styles.infoLine}>
+                    <span className={styles.label}>Website:</span>{' '}
+                    <a href={business.website} target="_blank" rel="noreferrer">
+                      {business.website.replace(/^https?:\/\//, '')}
+                    </a>
+                  </p>
+                )}
+              </section>
 
-          <section className={styles.infoSection}>
-            {business.address && <p className={styles.infoLine}>📍 {business.address}, {business.city} {business.zip}</p>}
-            {business.phone && <p className={styles.infoLine}>📞 <a href={`tel:${business.phone}`} className={styles.link}>{business.phone}</a></p>}
-            {business.website && <p className={styles.infoLine}>🌐 <a href={business.website} target="_blank" rel="noreferrer" className={styles.link}>{business.website.replace(/^https?:\/\//, '')}</a></p>}
-            {business.description && <p className={styles.description}>{business.description}</p>}
-          </section>
-
-          {business.hours && (
-            <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Hours</h2>
-              <BusinessHours hours={business.hours} />
-            </section>
-          )}
-
-          {business.deals.length > 0 && (
-            <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Active Deals</h2>
-              {business.deals.map((deal) => <DealCard key={deal.id} deal={deal} />)}
-            </section>
-          )}
-
-          <section className={styles.section}>
-            <div className={styles.reviewsHeader}>
-              <h2 className={styles.sectionTitle}>Reviews ({business.reviews.length})</h2>
-              {user ? (
-                <button className={styles.reviewBtn} onClick={() => setShowReviewModal(true)}>
-                  Leave a Review
-                </button>
-              ) : (
-                <Link to="/login" className={styles.reviewBtn}>Login to review</Link>
+              {business.hours && (
+                <section className={styles.section}>
+                  <h2 className={styles.sectionTitle}>Hours</h2>
+                  <BusinessHours hours={business.hours} />
+                </section>
               )}
-            </div>
-            {business.reviews.length === 0
-              ? <p className={styles.noReviews}>No reviews yet — be the first!</p>
-              : business.reviews.map((r) => <ReviewCard key={r.id} review={r} />)
-            }
-          </section>
-        </div>
 
-        <div className={styles.right}>
-          {business.lat !== null && business.lng !== null && (
-            <MiniMap lat={business.lat} lng={business.lng} name={business.name} />
-          )}
+              {business.deals.length > 0 && (
+                <section className={styles.section}>
+                  <h2 className={styles.sectionTitle}>Active Deals</h2>
+                  {business.deals.map((deal) => <DealCard key={deal.id} deal={deal} />)}
+                </section>
+              )}
+
+              <section className={styles.section}>
+                <div className={styles.reviewsHeader}>
+                  <h2 className={styles.sectionTitle}>Reviews ({business.reviews.length})</h2>
+                  {user ? (
+                    <button className={styles.reviewBtn} onClick={() => setShowReviewModal(true)}>
+                      Leave a Review
+                    </button>
+                  ) : (
+                    <Link to="/login" className={styles.reviewBtn}>Login to review</Link>
+                  )}
+                </div>
+                {business.reviews.length === 0
+                  ? <p className={styles.noReviews}>No reviews yet. Be the first.</p>
+                  : business.reviews.map((r) => <ReviewCard key={r.id} review={r} />)}
+              </section>
+            </div>
+
+            <aside className={styles.right}>
+              {business.lat !== null && business.lng !== null && (
+                <MiniMap lat={business.lat} lng={business.lng} name={business.name} />
+              )}
+            </aside>
+          </div>
         </div>
-      </div>
+      </section>
 
       {showReviewModal && (
         <ReviewModal
@@ -155,6 +185,6 @@ export default function BusinessDetail() {
           onReviewSubmitted={handleReviewSubmitted}
         />
       )}
-    </div>
+    </main>
   );
 }

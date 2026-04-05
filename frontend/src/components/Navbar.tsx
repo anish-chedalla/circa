@@ -4,7 +4,8 @@
  * Renders an optional injected slot row (used by MapDiscovery for filters).
  */
 
-import { NavLink } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 
 import { useAuth } from '../hooks/useAuth';
 import { useNavbarSlot } from '../context/NavbarSlotContext';
@@ -16,6 +17,13 @@ import styles from './Navbar.module.css';
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { slot } = useNavbarSlot();
+  const location = useLocation();
+  const isMapRoute = location.pathname === '/';
+  const [showMapTopNav, setShowMapTopNav] = useState(false);
+
+  useEffect(() => {
+    setShowMapTopNav(false);
+  }, [isMapRoute]);
 
   /** Return active CSS class for NavLink. */
   function activeClass({ isActive }: { isActive: boolean }) {
@@ -23,9 +31,35 @@ export default function Navbar() {
   }
 
   return (
-    <nav className={styles.nav}>
+    <nav
+      className={`${styles.nav} ${isMapRoute ? styles.mapNav : ''} ${
+        isMapRoute && showMapTopNav ? styles.mapNavVisible : ''
+      }`}
+      onMouseLeave={() => {
+        if (isMapRoute) setShowMapTopNav(false);
+      }}
+      onFocusCapture={() => {
+        if (isMapRoute) setShowMapTopNav(true);
+      }}
+      onBlurCapture={(event) => {
+        if (!isMapRoute) return;
+        const next = event.relatedTarget as Node | null;
+        if (!next || !event.currentTarget.contains(next)) {
+          setShowMapTopNav(false);
+        }
+      }}
+    >
+      {isMapRoute && (
+        <div
+          className={styles.hoverZone}
+          onMouseEnter={() => setShowMapTopNav(true)}
+          aria-hidden="true"
+        />
+      )}
+
       <div className={styles.topRow}>
         <NavLink to="/" className={styles.brand} end>
+          <img src="/circa-icon.svg" alt="" className={styles.brandIcon} />
           Circa
         </NavLink>
 

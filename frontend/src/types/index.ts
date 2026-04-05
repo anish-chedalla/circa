@@ -16,6 +16,10 @@ export interface Business {
   phone: string | null;
   website: string | null;
   description: string | null;
+  google_place_id?: string | null;
+  google_photo_url?: string | null;
+  google_summary?: string | null;
+  google_last_synced_at?: string | null;
   hours: Record<string, string> | null;
   is_chain: boolean;
   avg_rating: number;

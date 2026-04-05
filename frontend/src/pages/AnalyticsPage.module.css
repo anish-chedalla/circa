@@ -1,79 +1,249 @@
 .page {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
-}
-
-.title {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: var(--text-h, #111827);
-  margin: 0 0 1.75rem;
+  min-height: 100vh;
+  background: #ffffff;
+  color: #111827;
 }
 
 .status {
-  padding: 3rem;
+  padding: 4rem 1.5rem;
   text-align: center;
-  color: var(--text-muted, #9ca3af);
-  font-size: 0.9rem;
+  color: #4b5563;
 }
 
-.statCards {
+.container {
+  width: min(1120px, calc(100% - 3rem));
+  margin: 0 auto;
+}
+
+.hero {
+  padding: 4.75rem 0;
+  background: #ffffff;
+}
+
+.heroGrid {
+  width: min(1120px, calc(100% - 3rem));
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.25fr);
+  gap: 3rem;
+  align-items: stretch;
 }
 
-.statCard {
-  background: var(--surface, #ffffff);
-  border: 1px solid var(--border, #e5e7eb);
-  border-radius: 12px;
-  padding: 1.25rem 1rem;
+.heroImageWrap {
+  position: relative;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.heroImageWrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(170deg, rgba(17, 24, 39, 0.08), rgba(17, 24, 39, 0.35));
+}
+
+.heroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.heroContent {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-  text-align: center;
+  align-items: flex-start;
+}
+
+.kicker {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #3b4cc0;
+}
+
+.kickerUnderline {
+  width: 40px;
+  height: 1px;
+  margin-top: 0.7rem;
+  background: #3b4cc0;
+}
+
+.title {
+  margin: 1.35rem 0 0;
+  font-family: var(--serif);
+  font-size: clamp(2.6rem, 5vw, 3.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.lead {
+  margin: 1.35rem 0 0;
+  font-size: 1.08rem;
+  line-height: 1.9;
+  color: #4b5563;
+  max-width: 700px;
+}
+
+.stats {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.stat {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 0.9rem;
 }
 
 .statValue {
-  font-size: 2rem;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.02em;
+  display: block;
+  font-size: 1.5rem;
+  font-family: var(--serif);
+  color: #111827;
 }
 
 .statLabel {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-muted, #9ca3af);
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.82rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  color: #6b7280;
 }
 
-.chartsGrid {
+.trendingSection {
+  background: #f6f7fb;
+  padding: 5rem 0;
+}
+
+.gemsGrid {
+  margin-top: 2.2rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
   gap: 1.5rem;
 }
 
-@media (max-width: 540px) {
-  .chartsGrid {
+.gemRow {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 1.2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(59, 76, 192, 0.18);
+}
+
+.gemRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.rank {
+  font-size: 1.5rem;
+  font-family: var(--serif);
+  color: #3b4cc0;
+}
+
+.gemBody {
+  min-width: 0;
+}
+
+.gemTitle {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.75rem;
+  line-height: 1.15;
+}
+
+.gemTitle a {
+  color: #111827;
+  text-decoration: none;
+}
+
+.gemTitle a:hover {
+  color: #3b4cc0;
+}
+
+.gemMeta {
+  margin: 0.55rem 0 0;
+  font-size: 0.92rem;
+  color: #6b7280;
+}
+
+.gemSummary {
+  margin: 0.85rem 0 0;
+  font-size: 1.03rem;
+  line-height: 1.85;
+  color: #374151;
+}
+
+.categoriesSection {
+  padding: 5rem 0;
+}
+
+.categoriesGrid {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.categoryCard {
+  border-top: 1px solid #c7d2fe;
+  padding-top: 1rem;
+}
+
+.categoryCard h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.45rem;
+}
+
+.categoryCard p {
+  margin: 0.45rem 0 0;
+  color: #4b5563;
+}
+
+@media (max-width: 1000px) {
+  .heroGrid {
     grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .heroImageWrap {
+    min-height: 320px;
+  }
+
+  .stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .categoriesGrid {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
-.chartCard {
-  background: var(--surface, #ffffff);
-  border: 1px solid var(--border, #e5e7eb);
-  border-radius: 12px;
-  padding: 1.25rem 1rem 1rem;
-}
+@media (max-width: 640px) {
+  .container,
+  .heroGrid {
+    width: min(1120px, calc(100% - 2rem));
+  }
 
-.chartTitle {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--text-h, #111827);
-  margin: 0 0 1rem;
+  .hero,
+  .trendingSection,
+  .categoriesSection {
+    padding: 4rem 0;
+  }
+
+  .stats,
+  .categoriesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .gemRow {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .gemTitle {
+    font-size: 1.45rem;
+  }
 }

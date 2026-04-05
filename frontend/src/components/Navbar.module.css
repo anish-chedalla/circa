@@ -7,6 +7,15 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
+.hoverZone {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 14px;
+  z-index: 520;
+}
+
 .topRow {
   display: flex;
   align-items: center;
@@ -21,12 +30,41 @@
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   font-weight: 800;
   font-size: 1.1rem;
   color: #111827;
   text-decoration: none;
   letter-spacing: -0.01em;
   white-space: nowrap;
+}
+
+.brandIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.mapNav .topRow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  transform: translateY(-110%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+
+.mapNavVisible .topRow,
+.mapNav:focus-within .topRow {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .links {

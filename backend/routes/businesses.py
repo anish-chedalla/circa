@@ -109,6 +109,12 @@ def _serialize_business(biz: Business) -> dict:
         "phone": biz.phone,
         "website": biz.website,
         "description": biz.description,
+        "google_place_id": biz.google_place_id,
+        "google_photo_url": biz.google_photo_url,
+        "google_summary": biz.google_summary,
+        "google_last_synced_at": (
+            biz.google_last_synced_at.isoformat() if biz.google_last_synced_at else None
+        ),
         "hours": biz.hours,
         "is_chain": biz.is_chain,
         "avg_rating": biz.avg_rating,

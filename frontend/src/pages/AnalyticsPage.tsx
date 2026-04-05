@@ -1,144 +1,132 @@
-/**
- * Analytics page: platform-wide statistics with Recharts visualizations.
- */
-
-import { useEffect, useState } from 'react';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Legend,
-} from 'recharts';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { get } from '../services/api';
 import logger from '../services/logger';
-import type { ApiResponse } from '../types';
+import type { ApiResponse, Business } from '../types';
 import styles from './AnalyticsPage.module.css';
 
-interface BizStat {
-  id: number;
-  name: string;
-  category: string;
-  avg_rating: number;
-  review_count: number;
-}
-
 interface AnalyticsData {
-  top_rated: BizStat[];
-  most_reviewed: BizStat[];
   category_counts: Record<string, number>;
-  active_deals_count: number;
   total_businesses: number;
   total_reviews: number;
   total_users: number;
 }
 
-interface CategoryDatum { name: string; count: number; fill: string; }
-
-const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
-
-/** Truncate long strings for axis labels. */
-function truncate(s: string, n = 14): string {
-  return s.length > n ? s.slice(0, n) + '…' : s;
+interface GemBusiness extends Business {
+  score?: number;
 }
 
-/**
- * Renders the analytics dashboard with stat cards and Recharts charts.
- */
 export default function AnalyticsPage() {
-  const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [gems, setGems] = useState<GemBusiness[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
 
   useEffect(() => {
-    get<ApiResponse<AnalyticsData>>('/analytics')
-      .then((resp) => setData(resp.data))
-      .catch((err) => logger.error('Failed to load analytics', err))
+    setLoading(true);
+    Promise.all([
+      get<ApiResponse<GemBusiness[]>>('/businesses/hidden-gems?limit=9'),
+      get<ApiResponse<AnalyticsData>>('/analytics'),
+    ])
+      .then(([gemsResp, analyticsResp]) => {
+        setGems(gemsResp.data ?? []);
+        setAnalytics(analyticsResp.data);
+      })
+      .catch((err) => logger.error('Failed to load trending data', err))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className={styles.status}>Loading analytics…</div>;
-  if (!data) return <div className={styles.status}>Failed to load analytics data.</div>;
+  const categoryHighlights = useMemo(() => {
+    if (!analytics?.category_counts) return [];
+    return Object.entries(analytics.category_counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4);
+  }, [analytics]);
 
-  const topRatedData = data.top_rated.map((b) => ({
-    name: truncate(b.name),
-    rating: b.avg_rating,
-  }));
+  const heroImage = gems.find((b) => b.google_photo_url)?.google_photo_url ?? '/about/small-business.jpg';
 
-  const mostReviewedData = data.most_reviewed.map((b) => ({
-    name: truncate(b.name),
-    reviews: b.review_count,
-  }));
-
-  const categoryData: CategoryDatum[] = Object.entries(data.category_counts).map(
-    ([name, count], i) => ({ name, count, fill: COLORS[i % COLORS.length] }),
-  );
+  if (loading) return <div className={styles.status}>Loading trending data...</div>;
 
   return (
-    <div className={styles.page}>
-      <h1 className={styles.title}>Platform Analytics</h1>
+    <main className={styles.page}>
+      <section className={styles.hero}>
+        <div className={styles.heroGrid}>
+          <div className={styles.heroImageWrap}>
+            <img src={heroImage} alt="Trending local businesses" className={styles.heroImage} />
+          </div>
 
-      <div className={styles.statCards}>
-        <StatCard label="Businesses" value={data.total_businesses} color="#2563eb" />
-        <StatCard label="Reviews" value={data.total_reviews} color="#10b981" />
-        <StatCard label="Users" value={data.total_users} color="#8b5cf6" />
-        <StatCard label="Active Deals" value={data.active_deals_count} color="#f59e0b" />
-      </div>
+          <div className={styles.heroContent}>
+            <p className={styles.kicker}>Trending</p>
+            <div className={styles.kickerUnderline} aria-hidden="true" />
+            <h1 className={styles.title}>Hidden Gems Across the Community</h1>
+            <p className={styles.lead}>
+              Circa highlights businesses with strong quality signals that deserve more visibility.
+              Hidden gems are ranked by review quality, review activity, and recency.
+            </p>
 
-      <div className={styles.chartsGrid}>
-        <div className={styles.chartCard}>
-          <h2 className={styles.chartTitle}>Top 10 Rated Businesses</h2>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={topRatedData} margin={{ top: 5, right: 10, left: 0, bottom: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-35} textAnchor="end" interval={0} />
-              <YAxis domain={[0, 5]} tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Bar dataKey="rating" name="Avg Rating" fill="#2563eb" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+            {analytics && (
+              <div className={styles.stats}>
+                <Stat label="Businesses" value={analytics.total_businesses} />
+                <Stat label="Reviews" value={analytics.total_reviews} />
+                <Stat label="Users" value={analytics.total_users} />
+              </div>
+            )}
+          </div>
         </div>
+      </section>
 
-        <div className={styles.chartCard}>
-          <h2 className={styles.chartTitle}>Top 10 Most Reviewed</h2>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={mostReviewedData} margin={{ top: 5, right: 10, left: 0, bottom: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-35} textAnchor="end" interval={0} />
-              <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Bar dataKey="reviews" name="Review Count" fill="#10b981" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+      <section className={styles.trendingSection}>
+        <div className={styles.container}>
+          <p className={styles.kicker}>Top Picks</p>
+          <div className={styles.kickerUnderline} aria-hidden="true" />
+          <div className={styles.gemsGrid}>
+            {gems.map((biz, index) => (
+              <article key={biz.id} className={styles.gemRow}>
+                <div className={styles.rank}>{index + 1}</div>
+                <div className={styles.gemBody}>
+                  <h2 className={styles.gemTitle}>
+                    <Link to={`/business/${biz.id}`}>{biz.name}</Link>
+                  </h2>
+                  <p className={styles.gemMeta}>
+                    {biz.category} in {biz.city} | Rating {biz.avg_rating.toFixed(1)} | {biz.review_count} reviews
+                  </p>
+                  <p className={styles.gemSummary}>
+                    {biz.google_summary || biz.description || 'A high-potential local business worth exploring.'}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
+      </section>
 
-        <div className={styles.chartCard}>
-          <h2 className={styles.chartTitle}>Businesses by Category</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={categoryData}
-                dataKey="count"
-                nameKey="name"
-                cx="50%"
-                cy="45%"
-                outerRadius={100}
-                paddingAngle={2}
-              />
-              <Tooltip />
-              <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: '0.78rem' }} />
-            </PieChart>
-          </ResponsiveContainer>
+      <section className={styles.categoriesSection}>
+        <div className={styles.container}>
+          <p className={styles.kicker}>Category Momentum</p>
+          <div className={styles.kickerUnderline} aria-hidden="true" />
+          <div className={styles.categoriesGrid}>
+            {categoryHighlights.map(([name, count]) => (
+              <article key={name} className={styles.categoryCard}>
+                <h3>{name}</h3>
+                <p>{count} active listings</p>
+              </article>
+            ))}
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
 
-interface StatCardProps { label: string; value: number; color: string; }
+interface StatProps {
+  label: string;
+  value: number;
+}
 
-/** Single stat number card. Uses a CSS variable via data attribute to avoid inline styles. */
-function StatCard({ label, value, color }: StatCardProps) {
+function Stat({ label, value }: StatProps) {
   return (
-    <div className={styles.statCard}>
-      <span className={styles.statValue} style={{ color }}>{value.toLocaleString()}</span>
+    <div className={styles.stat}>
+      <span className={styles.statValue}>{value.toLocaleString()}</span>
       <span className={styles.statLabel}>{label}</span>
     </div>
   );
