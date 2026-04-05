@@ -6,6 +6,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from backend.database import Base, engine
 
@@ -21,7 +22,26 @@ async def lifespan(app: FastAPI):
     import backend.models  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
+    _ensure_google_enrichment_columns()
     yield
+
+
+def _ensure_google_enrichment_columns() -> None:
+    """Ensure enrichment columns exist for existing deployments.
+
+    This project currently uses model-driven table creation without migrations.
+    Existing Supabase tables need explicit ALTER statements for new columns.
+    """
+    statements = [
+        "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_place_id VARCHAR(128)",
+        "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_photo_ref VARCHAR(512)",
+        "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_photo_url VARCHAR(1024)",
+        "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_summary TEXT",
+        "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_last_synced_at TIMESTAMPTZ",
+    ]
+    with engine.begin() as conn:
+        for stmt in statements:
+            conn.execute(text(stmt))
 
 
 app = FastAPI(

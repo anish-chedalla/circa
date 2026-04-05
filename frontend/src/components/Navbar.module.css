@@ -60,11 +60,30 @@
   transition: transform 220ms ease, opacity 220ms ease;
 }
 
+.mapNav .slotRow {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-12px);
+  pointer-events: none;
+  border-top-color: transparent;
+  transition: opacity 220ms ease, transform 220ms ease, max-height 220ms ease;
+}
+
 .mapNavVisible .topRow,
 .mapNav:focus-within .topRow {
   transform: translateY(0);
   opacity: 1;
   pointer-events: auto;
+}
+
+.mapNavVisible .slotRow,
+.mapNav:focus-within .slotRow {
+  max-height: 120px;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  border-top-color: #e5e7eb;
 }
 
 .links {

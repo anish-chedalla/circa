@@ -59,7 +59,7 @@ export default function Navbar() {
 
       <div className={styles.topRow}>
         <NavLink to="/" className={styles.brand} end>
-          <img src="/circa-icon.svg" alt="" className={styles.brandIcon} />
+          <img src="/acirca_icon_v6.svg" alt="" className={styles.brandIcon} />
           Circa
         </NavLink>
 

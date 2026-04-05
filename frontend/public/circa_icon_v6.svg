@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="gradOuter" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#111111"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+    <linearGradient id="gradInner" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6D28D9"/>
+      <stop offset="100%" stop-color="#111111"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer full circle -->
+  <circle cx="128" cy="128" r="82"
+    fill="none"
+    stroke="url(#gradOuter)"
+    stroke-width="16"
+    stroke-linecap="round"
+  />
+
+  <!-- Inner circle with gap centered exactly at the right -->
+  <circle cx="128" cy="128" r="66"
+    fill="none"
+    stroke="url(#gradInner)"
+    stroke-width="12"
+    stroke-linecap="round"
+    stroke-dasharray="300 114.6902302738527"
+    stroke-dashoffset="357.3451151369263"
+  />
+</svg>
