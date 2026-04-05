@@ -94,6 +94,20 @@
   text-align: center;
 }
 
+.captchaWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.captchaNote {
+  font-size: 0.82rem;
+  color: var(--text, #4b5563);
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+}
+
 .submitBtn {
   width: 100%;
   padding: 0.65rem 1rem;

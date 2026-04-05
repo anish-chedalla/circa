@@ -40,6 +40,7 @@ class LoginRequest(BaseModel):
 
     email: EmailStr
     password: str
+    captcha_token: str
 
 
 class UserResponse(BaseModel):
@@ -121,6 +122,14 @@ async def register(body: RegisterRequest, db: Session = Depends(get_db)):
 @router.post("/login")
 async def login(body: LoginRequest, db: Session = Depends(get_db)):
     """Authenticate a user and return a JWT."""
+    if not _is_recaptcha_placeholder():
+        captcha_ok = await verify_recaptcha(body.captcha_token)
+        if not captcha_ok:
+            return JSONResponse(
+                status_code=400,
+                content={"data": None, "error": "reCAPTCHA verification failed"},
+            )
+
     user = db.query(User).filter(User.email == body.email).first()
     if user is None or not verify_password(body.password, user.password_hash):
         return JSONResponse(

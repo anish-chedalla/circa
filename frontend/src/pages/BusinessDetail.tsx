@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 
 import { get, post, del } from '../services/api';
 import logger from '../services/logger';
@@ -15,6 +15,7 @@ import styles from './BusinessDetail.module.css';
 
 export default function BusinessDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [business, setBusiness] = useState<BusinessDetailType | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,7 +43,7 @@ export default function BusinessDetail() {
 
   async function toggleFavorite() {
     if (!user) {
-      window.location.href = '/login';
+      navigate('/login');
       return;
     }
     try {

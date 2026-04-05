@@ -55,14 +55,14 @@ export default function AboutPage() {
         <div className={styles.heroBackdrop} aria-hidden="true" />
         <div className={styles.heroOverlay} aria-hidden="true" />
         <div className={styles.heroContent}>
+          <p className={styles.heroStatement}>
+            Community. Connection. Commitment.
+          </p>
           <h1 id="about-hero-title" className={styles.heroTitle}>
             Circa
           </h1>
           <p className={styles.definition}>
             (n.) derived from Latin meaning around, round about, on all sides.
-          </p>
-          <p className={styles.heroStatement}>
-            Community. Connection. Commitment.  
           </p>
         </div>
       </section>

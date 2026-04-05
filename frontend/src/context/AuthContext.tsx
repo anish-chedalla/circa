@@ -30,7 +30,7 @@ interface AuthState {
 
 interface AuthContextValue extends AuthState {
   /** Authenticate with email + password and persist the JWT. */
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, captchaToken: string) => Promise<void>;
   /** Register a new account (with reCAPTCHA token) and persist the JWT. */
   register: (email: string, password: string, captchaToken: string) => Promise<void>;
   /** Clear the session and remove the stored JWT. */
@@ -93,8 +93,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   /* ---------- login ----------------------------------------------- */
-  const login = useCallback(async (email: string, password: string) => {
-    const resp = await post<AuthTokenResponse>('/auth/login', { email, password });
+  const login = useCallback(async (email: string, password: string, captchaToken: string) => {
+    const resp = await post<AuthTokenResponse>('/auth/login', {
+      email,
+      password,
+      captcha_token: captchaToken,
+    });
     if (resp.error || !resp.data) throw new Error(resp.error ?? 'Login failed');
     const { token, user } = resp.data;
     localStorage.setItem('token', token);

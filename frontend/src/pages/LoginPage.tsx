@@ -5,13 +5,18 @@
  * and inline error display. Redirects to the home page on success.
  */
 
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 import { useAuth } from '../hooks/useAuth';
 import logger from '../services/logger';
 import styles from './LoginPage.module.css';
+
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY as
+  | string
+  | undefined;
 
 /** Field-level validation errors. */
 interface FieldErrors {
@@ -55,9 +60,11 @@ function extractApiError(error: unknown): string {
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const captchaRef = useRef<ReCAPTCHA | null>(null);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -77,12 +84,14 @@ export default function LoginPage() {
     setSubmitting(true);
 
     try {
-      await login(email, password);
+      await login(email, password, captchaToken ?? '');
       navigate('/', { replace: true });
     } catch (err: unknown) {
       const message = extractApiError(err);
       setApiError(message);
       logger.error('Login failed:', message);
+      captchaRef.current?.reset();
+      setCaptchaToken(null);
     } finally {
       setSubmitting(false);
     }
@@ -132,6 +141,21 @@ export default function LoginPage() {
               <span className={styles.fieldError}>{fieldErrors.password}</span>
             )}
           </div>
+
+          {RECAPTCHA_SITE_KEY ? (
+            <div className={styles.captchaWrapper}>
+              <ReCAPTCHA
+                ref={captchaRef}
+                sitekey={RECAPTCHA_SITE_KEY}
+                onChange={(token) => setCaptchaToken(token)}
+                onExpired={() => setCaptchaToken(null)}
+              />
+            </div>
+          ) : (
+            <p className={styles.captchaNote}>
+              reCAPTCHA not configured - login will proceed without verification.
+            </p>
+          )}
 
           <button
             className={styles.submitBtn}
