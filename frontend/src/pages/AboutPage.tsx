@@ -1,5 +1,5 @@
 /**
- * About page: project description with images and content sections.
+ * About page: project description with hero section, logo, and purple/white theme.
  */
 
 import styles from './AboutPage.module.css';
@@ -7,7 +7,22 @@ import styles from './AboutPage.module.css';
 export default function AboutPage() {
   return (
     <main className={styles.page}>
-      <h1 className={styles.pageTitle}>About Circa</h1>
+      {/* Header with logo */}
+      <div className={styles.headerLogo}>
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="45" stroke="#7c3aed" strokeWidth="3"/>
+          <text x="50" y="60" fontSize="48" fontWeight="bold" textAnchor="middle" fill="#7c3aed">C</text>
+        </svg>
+      </div>
+
+      {/* Black translucent hero section */}
+      <section className={styles.hero}>
+        <h1 className={styles.heroTitle}>Circa</h1>
+        <p className={styles.heroMeaning}>Around</p>
+        <p className={styles.heroSubtitle}>
+          Showing dedication to local businesses and community support
+        </p>
+      </section>
 
       {/* Mission Section */}
       <section className={styles.section}>
