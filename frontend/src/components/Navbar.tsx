@@ -35,6 +35,9 @@ export default function Navbar() {
       className={`${styles.nav} ${isMapRoute ? styles.mapNav : ''} ${
         isMapRoute && showMapTopNav ? styles.mapNavVisible : ''
       }`}
+      onMouseEnter={() => {
+        if (isMapRoute) setShowMapTopNav(true);
+      }}
       onMouseLeave={() => {
         if (isMapRoute) setShowMapTopNav(false);
       }}
@@ -57,52 +60,54 @@ export default function Navbar() {
         />
       )}
 
-      <div className={styles.topRow}>
-        <NavLink to="/" className={styles.brand} end>
-          <img src="/acirca_icon_v6.svg" alt="" className={styles.brandIcon} />
-          Circa
-        </NavLink>
+      <div className={styles.headerGroup}>
+        <div className={styles.topRow}>
+          <NavLink to="/" className={styles.brand} end>
+            <img src="/acirca_icon_v6.svg" alt="" className={styles.brandIcon} />
+            Circa
+          </NavLink>
 
-        <ul className={styles.links}>
-          <li><NavLink to="/" className={activeClass} end>Map</NavLink></li>
-          <li><NavLink to="/analytics" className={activeClass}>Analytics</NavLink></li>
-          <li><NavLink to="/about" className={activeClass}>About</NavLink></li>
+          <ul className={styles.links}>
+            <li><NavLink to="/" className={activeClass} end>Map</NavLink></li>
+            <li><NavLink to="/analytics" className={activeClass}>Analytics</NavLink></li>
+            <li><NavLink to="/about" className={activeClass}>About</NavLink></li>
 
-          {user?.role === 'business_owner' && (
-            <li><NavLink to="/owner/dashboard" className={activeClass}>Dashboard</NavLink></li>
-          )}
-          {user?.role === 'admin' && (
-            <>
-              <li><NavLink to="/owner/dashboard" className={activeClass}>Owner</NavLink></li>
-              <li><NavLink to="/admin" className={activeClass}>Admin</NavLink></li>
-            </>
-          )}
+            {user?.role === 'business_owner' && (
+              <li><NavLink to="/owner/dashboard" className={activeClass}>Dashboard</NavLink></li>
+            )}
+            {user?.role === 'admin' && (
+              <>
+                <li><NavLink to="/owner/dashboard" className={activeClass}>Owner</NavLink></li>
+                <li><NavLink to="/admin" className={activeClass}>Admin</NavLink></li>
+              </>
+            )}
 
-          {!user && (
-            <>
-              <li><NavLink to="/login" className={activeClass}>Login</NavLink></li>
-              <li><NavLink to="/register" className={`${styles.navLink} ${styles.registerBtn}`}>Register</NavLink></li>
-            </>
-          )}
+            {!user && (
+              <>
+                <li><NavLink to="/login" className={activeClass}>Login</NavLink></li>
+                <li><NavLink to="/register" className={`${styles.navLink} ${styles.registerBtn}`}>Register</NavLink></li>
+              </>
+            )}
+
+            {user && (
+              <li><NavLink to="/profile" className={activeClass}>Profile</NavLink></li>
+            )}
+          </ul>
 
           {user && (
-            <li><NavLink to="/profile" className={activeClass}>Profile</NavLink></li>
+            <div className={styles.userSection}>
+              <span className={`${styles.roleBadge} ${styles[`role_${user.role}`]}`}>
+                {user.role.replace('_', ' ')}
+              </span>
+              <button type="button" className={styles.logoutBtn} onClick={logout}>
+                Logout
+              </button>
+            </div>
           )}
-        </ul>
+        </div>
 
-        {user && (
-          <div className={styles.userSection}>
-            <span className={`${styles.roleBadge} ${styles[`role_${user.role}`]}`}>
-              {user.role.replace('_', ' ')}
-            </span>
-            <button type="button" className={styles.logoutBtn} onClick={logout}>
-              Logout
-            </button>
-          </div>
-        )}
+        {slot && <div className={styles.slotRow}>{slot}</div>}
       </div>
-
-      {slot && <div className={styles.slotRow}>{slot}</div>}
     </nav>
   );
 }

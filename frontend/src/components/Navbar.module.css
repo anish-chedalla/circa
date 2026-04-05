@@ -7,6 +7,10 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
+.headerGroup {
+  background: #ffffff;
+}
+
 .hoverZone {
   position: fixed;
   top: 0;
@@ -48,42 +52,33 @@
 }
 
 .mapNav .topRow {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  background: #ffffff;
+  position: static;
+}
+
+.mapNav {
+  background: transparent;
+  border-bottom-color: transparent;
+  box-shadow: none;
+}
+
+.mapNav .headerGroup {
   border-bottom: 1px solid #e5e7eb;
-  transform: translateY(-110%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transform: translateY(-108%);
   opacity: 0;
   pointer-events: none;
   transition: transform 220ms ease, opacity 220ms ease;
 }
 
 .mapNav .slotRow {
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(-12px);
-  pointer-events: none;
-  border-top-color: transparent;
-  transition: opacity 220ms ease, transform 220ms ease, max-height 220ms ease;
+  border-top: 1px solid #e5e7eb;
 }
 
-.mapNavVisible .topRow,
-.mapNav:focus-within .topRow {
+.mapNavVisible .headerGroup,
+.mapNav:focus-within .headerGroup {
   transform: translateY(0);
   opacity: 1;
   pointer-events: auto;
-}
-
-.mapNavVisible .slotRow,
-.mapNav:focus-within .slotRow {
-  max-height: 120px;
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-  border-top-color: #e5e7eb;
 }
 
 .links {
