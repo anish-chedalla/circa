@@ -4,13 +4,14 @@
   align-items: flex-start;
   padding: 3rem 1rem;
   min-height: calc(100vh - 60px);
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
 }
 
 .card {
   width: 100%;
   max-width: 420px;
-  background: var(--bg, #fff);
-  border: 1px solid var(--border, #e5e7eb);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 2.5rem 2rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
@@ -19,13 +20,13 @@
 .title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text-h, #111827);
+  color: #111827;
   margin-bottom: 0.25rem;
 }
 
 .subtitle {
   font-size: 0.95rem;
-  color: var(--text, #4b5563);
+  color: #4b5563;
   margin-bottom: 1.75rem;
 }
 
@@ -44,7 +45,7 @@
 .label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-h, #111827);
+  color: #111827;
 }
 
 .input {
@@ -52,22 +53,22 @@
   padding: 0.6rem 0.75rem;
   font-size: 0.95rem;
   font-family: var(--sans, system-ui, sans-serif);
-  border: 1px solid var(--border, #e5e7eb);
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
-  background: var(--bg, #fff);
-  color: var(--text-h, #111827);
+  background: #ffffff;
+  color: #111827;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .input::placeholder {
-  color: var(--text, #4b5563);
+  color: #4b5563;
   opacity: 0.5;
 }
 
 .input:focus {
-  border-color: var(--accent, #6366f1);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  border-color: #3b4cc0;
+  box-shadow: 0 0 0 3px rgba(59, 76, 192, 0.14);
 }
 
 .inputError {
@@ -101,7 +102,7 @@
 
 .captchaNote {
   font-size: 0.82rem;
-  color: var(--text, #4b5563);
+  color: #4b5563;
   background: rgba(99, 102, 241, 0.06);
   border: 1px solid rgba(99, 102, 241, 0.18);
   border-radius: 8px;
@@ -115,7 +116,7 @@
   font-weight: 600;
   font-family: var(--sans, system-ui, sans-serif);
   color: #fff;
-  background: var(--accent, #6366f1);
+  background: #3b4cc0;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -123,7 +124,7 @@
 }
 
 .submitBtn:hover:not(:disabled) {
-  background: var(--accent-hover, #4f46e5);
+  background: #2f3ea3;
 }
 
 .submitBtn:disabled {
@@ -135,16 +136,16 @@
   text-align: center;
   margin-top: 1.5rem;
   font-size: 0.9rem;
-  color: var(--text, #4b5563);
+  color: #4b5563;
 }
 
 .footerLink {
-  color: var(--accent, #6366f1);
+  color: #3b4cc0;
   font-weight: 500;
   text-decoration: none;
 }
 
 .footerLink:hover {
-  color: var(--accent-hover, #4f46e5);
+  color: #2f3ea3;
   text-decoration: underline;
 }
