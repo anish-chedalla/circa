@@ -196,11 +196,12 @@
   margin: 0;
   font-family: var(--serif);
   font-size: 1.45rem;
+  color: #111827;
 }
 
 .categoryCard p {
   margin: 0.45rem 0 0;
-  color: #4b5563;
+  color: #111827;
 }
 
 @media (max-width: 1000px) {

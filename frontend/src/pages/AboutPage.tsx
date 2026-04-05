@@ -35,9 +35,7 @@ export default function AboutPage() {
             (n.) derived from Latin meaning around, round about, on all sides.
           </p>
           <p className={styles.heroStatement}>
-            Circa helps people discover and support the communities around them
-            by connecting individuals with local businesses, places, and
-            opportunities nearby.
+            Community. Connection. Commitment.  
           </p>
         </div>
       </section>
@@ -45,7 +43,7 @@ export default function AboutPage() {
       <section className={styles.processSection} aria-labelledby="community-heading">
         <div className={styles.container}>
           <div className={styles.sectionIntro}>
-            <p className={styles.kicker}>Community</p>
+            <p className={styles.kicker}>The Circa Experience</p>
             <div className={styles.kickerUnderline} aria-hidden="true" />
           </div>
 
@@ -68,7 +66,7 @@ export default function AboutPage() {
         <div className={styles.container}>
           <div className={styles.contentGrid}>
             <div className={styles.contentHeading}>
-              <p className={styles.kicker}>Perspective</p>
+              <p className={styles.kicker}>Community</p>
               <div className={styles.kickerUnderline} aria-hidden="true" />
               <h2 id="content-title" className={styles.contentTitle}>
                 Circa and Community Discovery
