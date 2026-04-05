@@ -1,5 +1,5 @@
 /**
- * About page: simple, readable project description for judges and users.
+ * About page: project description with images and content sections.
  */
 
 import styles from './AboutPage.module.css';
@@ -7,64 +7,109 @@ import styles from './AboutPage.module.css';
 export default function AboutPage() {
   return (
     <main className={styles.page}>
-      <h1 className={styles.pageTitle}>About</h1>
+      <h1 className={styles.pageTitle}>About Circa</h1>
 
+      {/* Mission Section */}
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Our Mission</h2>
-        <p className={styles.text}>
-          Our goal is to make it easier for people to discover and support small, local businesses
-          in their communities. Independent businesses often struggle to compete with large chains
-          and online marketplaces. By making local businesses easier to find, we hope to help
-          communities support the places that make them unique.
-        </p>
+        <div className={styles.sectionContainer}>
+          <div className={styles.sectionImage}>
+            <img
+              src="/images/about_page/small_business.jpg"
+              alt="Community support"
+            />
+          </div>
+          <div className={styles.sectionContent}>
+            <h2 className={styles.sectionTitle}>Our Mission</h2>
+            <p className={styles.text}>
+              Our goal is to make it easier for people to discover and support small, local
+              businesses in their communities. Independent businesses often struggle to compete
+              with large chains and online marketplaces. By making local businesses easier to
+              find, we hope to help communities support the places that make them unique.
+            </p>
+          </div>
+        </div>
       </section>
 
+      {/* What We Do Section */}
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>What This Platform Does</h2>
-        <p className={styles.text}>
-          This platform helps users explore businesses in their area and find new places to visit.
-          Users can:
-        </p>
-        <ul className={styles.list}>
-          <li>Discover local businesses by category</li>
-          <li>View promotions and special deals</li>
-          <li>Read and leave reviews</li>
-          <li>Bookmark favorite businesses</li>
-          <li>Explore nearby businesses on a map</li>
-        </ul>
-        <p className={styles.text}>
-          These features help users quickly find places that match their interests while
-          supporting businesses in their community.
-        </p>
+        <div className={styles.sectionContainer}>
+          <div className={styles.sectionContent}>
+            <h2 className={styles.sectionTitle}>What This Platform Does</h2>
+            <p className={styles.text}>
+              This platform helps users explore businesses in their area and find new places to
+              visit. Users can:
+            </p>
+            <ul className={styles.list}>
+              <li>Discover local businesses by category</li>
+              <li>View promotions and special deals</li>
+              <li>Read and leave reviews</li>
+              <li>Bookmark favorite businesses</li>
+              <li>Explore nearby businesses on a map</li>
+            </ul>
+            <p className={styles.text}>
+              These features help users quickly find places that match their interests while
+              supporting businesses in their community.
+            </p>
+          </div>
+          <div className={styles.sectionImage}>
+            <img
+              src="https://images.unsplash.com/photo-1460925895917-adf4e0e49bfd?w=600&h=400&fit=crop"
+              alt="Business discovery"
+            />
+          </div>
+        </div>
       </section>
 
+      {/* Why Local Matters Section */}
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Why Local Businesses Matter</h2>
-        <p className={styles.text}>
-          Local businesses play an important role in shaping communities. They create jobs,
-          support local economies, and provide unique products and services that larger chains
-          often cannot offer. When people support local businesses, more money stays within the
-          community and helps it grow.
-        </p>
-        <p className={styles.text}>
-          Our platform aims to strengthen this connection by making local businesses easier to
-          discover.
-        </p>
+        <div className={styles.sectionContainer}>
+          <div className={styles.sectionImage}>
+            <img
+              src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop"
+              alt="Local business community"
+            />
+          </div>
+          <div className={styles.sectionContent}>
+            <h2 className={styles.sectionTitle}>Why Local Businesses Matter</h2>
+            <p className={styles.text}>
+              Local businesses play an important role in shaping communities. They create jobs,
+              support local economies, and provide unique products and services that larger chains
+              often cannot offer. When people support local businesses, more money stays within
+              the community and helps it grow.
+            </p>
+            <p className={styles.text}>
+              Our platform aims to strengthen this connection by making local businesses easier to
+              discover.
+            </p>
+          </div>
+        </div>
       </section>
 
+      {/* Our Goal Section */}
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Our Goal</h2>
-        <p className={styles.text}>
-          We want to make discovering small businesses simple and accessible. Whether someone is
-          looking for a new restaurant, a local shop, or a service nearby, this platform helps
-          connect people with businesses in their community.
-        </p>
-        <p className={styles.text}>
-          By improving visibility for local businesses, we hope to encourage people to explore and
-          support the places around them.
-        </p>
+        <div className={styles.sectionContainer}>
+          <div className={styles.sectionContent}>
+            <h2 className={styles.sectionTitle}>Our Goal</h2>
+            <p className={styles.text}>
+              We want to make discovering small businesses simple and accessible. Whether someone
+              is looking for a new restaurant, a local shop, or a service nearby, this platform
+              helps connect people with businesses in their community.
+            </p>
+            <p className={styles.text}>
+              By improving visibility for local businesses, we hope to encourage people to explore
+              and support the places around them.
+            </p>
+          </div>
+          <div className={styles.sectionImage}>
+            <img
+              src="https://images.unsplash.com/photo-1552664730-d307cb007067?w=600&h=400&fit=crop"
+              alt="Supporting small businesses"
+            />
+          </div>
+        </div>
       </section>
 
+      {/* About Project Section */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>About the Project</h2>
         <p className={styles.text}>
