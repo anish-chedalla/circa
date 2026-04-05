@@ -126,7 +126,7 @@ export default function AboutPage() {
           </div>
 
           <h2 id="team-title" className={styles.teamTitle}>
-            The Builders Behind Circa
+            The Architects Behind Circa
           </h2>
 
           <div className={styles.teamGrid}>
