@@ -251,7 +251,6 @@ export default function OwnerDashboard() {
     <main className={styles.page}>
       <header className={styles.hero}>
         <div>
-          <p className={styles.kicker}>Circa for owners</p>
           <h1 className={styles.title}>Business Dashboard</h1>
           <p className={styles.lead}>
             Track discovery activity, keep your listing updated, and manage deals from one place.

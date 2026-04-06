@@ -84,7 +84,15 @@ export default function LoginPage() {
     setSubmitting(true);
 
     try {
-      await login(email, password, captchaToken ?? '');
+      const signedInUser = await login(email, password, captchaToken ?? '');
+      if (signedInUser.role === 'business_owner') {
+        navigate('/owner/dashboard', { replace: true });
+        return;
+      }
+      if (signedInUser.role === 'admin') {
+        navigate('/admin', { replace: true });
+        return;
+      }
       navigate('/', { replace: true });
     } catch (err: unknown) {
       const message = extractApiError(err);
@@ -99,86 +107,106 @@ export default function LoginPage() {
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Welcome back</h1>
-        <p className={styles.subtitle}>Sign in to your account</p>
+      <div className={styles.backdrop} />
+      <div className={styles.layout}>
+        <aside className={styles.leftRail}>
+          <p className={styles.railLabel}>Sign in</p>
+          <h1 className={styles.railTitle}>Welcome back to Circa</h1>
+          <p className={styles.railText}>
+            One login works for everyone. We’ll route you to your correct experience after sign in.
+          </p>
 
-        <form className={styles.form} onSubmit={handleSubmit} noValidate>
-          {apiError && <div className={styles.apiError}>{apiError}</div>}
-
-          <div className={styles.fieldGroup}>
-            <label className={styles.label} htmlFor="login-email">
-              Email
-            </label>
-            <input
-              id="login-email"
-              className={`${styles.input} ${fieldErrors.email ? styles.inputError : ''}`}
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            {fieldErrors.email && (
-              <span className={styles.fieldError}>{fieldErrors.email}</span>
-            )}
-          </div>
-
-          <div className={styles.fieldGroup}>
-            <label className={styles.label} htmlFor="login-password">
-              Password
-            </label>
-            <input
-              id="login-password"
-              className={`${styles.input} ${fieldErrors.password ? styles.inputError : ''}`}
-              type="password"
-              placeholder="Your password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            {fieldErrors.password && (
-              <span className={styles.fieldError}>{fieldErrors.password}</span>
-            )}
-          </div>
-
-          {RECAPTCHA_SITE_KEY ? (
-            <div className={styles.captchaWrapper}>
-              <ReCAPTCHA
-                ref={captchaRef}
-                sitekey={RECAPTCHA_SITE_KEY}
-                onChange={(token) => setCaptchaToken(token)}
-                onExpired={() => setCaptchaToken(null)}
-              />
-            </div>
-          ) : (
-            <p className={styles.captchaNote}>
-              reCAPTCHA not configured - login will proceed without verification.
+          <div className={styles.railLinks}>
+            <p>
+              New user account? <Link className={styles.footerLink} to="/register">Register as user</Link>
             </p>
-          )}
+            <p>
+              New owner account?{' '}
+              <Link className={styles.footerLink} to="/business-register">
+                Register as business owner
+              </Link>
+            </p>
+          </div>
+        </aside>
 
-          <button
-            className={styles.submitBtn}
-            type="submit"
-            disabled={submitting}
-          >
-            {submitting ? 'Signing in...' : 'Sign in'}
-          </button>
-        </form>
+        <div className={styles.card}>
+          <h2 className={styles.title}>Login</h2>
+          <p className={styles.subtitle}>Enter your account credentials</p>
 
-        <p className={styles.footer}>
-          Don&apos;t have an account?{' '}
-          <Link className={styles.footerLink} to="/register">
-            Register
-          </Link>
-        </p>
+          <form className={styles.form} onSubmit={handleSubmit} noValidate>
+            {apiError && <div className={styles.apiError}>{apiError}</div>}
 
-        <p className={styles.footer}>
-          Trying to login as business owner?{' '}
-          <Link className={styles.footerLink} to="/business-login">
-            Business login page
-          </Link>
-        </p>
+            <div className={styles.fieldGroup}>
+              <label className={styles.label} htmlFor="login-email">
+                Email
+              </label>
+              <input
+                id="login-email"
+                className={`${styles.input} ${fieldErrors.email ? styles.inputError : ''}`}
+                type="email"
+                placeholder="you@example.com"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {fieldErrors.email && (
+                <span className={styles.fieldError}>{fieldErrors.email}</span>
+              )}
+            </div>
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.label} htmlFor="login-password">
+                Password
+              </label>
+              <input
+                id="login-password"
+                className={`${styles.input} ${fieldErrors.password ? styles.inputError : ''}`}
+                type="password"
+                placeholder="Your password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              {fieldErrors.password && (
+                <span className={styles.fieldError}>{fieldErrors.password}</span>
+              )}
+            </div>
+
+            {RECAPTCHA_SITE_KEY ? (
+              <div className={styles.captchaWrapper}>
+                <ReCAPTCHA
+                  ref={captchaRef}
+                  sitekey={RECAPTCHA_SITE_KEY}
+                  onChange={(token) => setCaptchaToken(token)}
+                  onExpired={() => setCaptchaToken(null)}
+                />
+              </div>
+            ) : (
+              <p className={styles.captchaNote}>
+                reCAPTCHA not configured - login will proceed without verification.
+              </p>
+            )}
+
+            <button
+              className={styles.submitBtn}
+              type="submit"
+              disabled={submitting}
+            >
+              {submitting ? 'Signing in...' : 'Sign in'}
+            </button>
+          </form>
+
+          <p className={styles.footer}>
+            Don&apos;t have an account?{' '}
+            <Link className={styles.footerLink} to="/register">
+              User register
+            </Link>{' '}
+            or{' '}
+            <Link className={styles.footerLink} to="/business-register">
+              Owner register
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

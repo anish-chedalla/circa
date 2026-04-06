@@ -136,7 +136,11 @@ export default function BusinessRegisterPage() {
         </form>
 
         <p className={styles.footer}>
-          Already have a business account? <Link to="/business-login">Business login</Link>
+          Already have a business account? <Link to="/login">Login</Link>
+        </p>
+
+        <p className={styles.footer}>
+          Need a standard user account? <Link to="/register">User register</Link>
         </p>
       </div>
     </div>

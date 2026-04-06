@@ -39,7 +39,7 @@ export default function PromoteBusinessPage() {
 
           <div className={styles.actions}>
             <Link to="/business-register" className={styles.primaryAction}>Create Business Account</Link>
-            <Link to="/business-login" className={styles.secondaryAction}>Business Login</Link>
+            <Link to="/login" className={styles.secondaryAction}>Owner Login</Link>
           </div>
         </div>
       </section>

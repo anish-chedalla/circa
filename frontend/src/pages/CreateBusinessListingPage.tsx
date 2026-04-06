@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-import { get, post } from '../services/api';
-import logger from '../services/logger';
+import { post } from '../services/api';
 import type { ApiResponse } from '../types';
 import styles from './CreateBusinessListingPage.module.css';
 
@@ -21,21 +20,9 @@ const CATEGORIES = [
 
 interface OwnerListing {
   id: number;
-  name: string;
-  category: string;
-  city: string;
-  address: string | null;
-  zip: string | null;
-  phone: string | null;
-  website: string | null;
-  description: string | null;
-  hours: Hours | null;
-  listing_status: string;
 }
 
 export default function CreateBusinessListingPage() {
-  const [existing, setExisting] = useState<OwnerListing | null>(null);
-  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -48,15 +35,6 @@ export default function CreateBusinessListingPage() {
   const [website, setWebsite] = useState('');
   const [description, setDescription] = useState('');
   const [hours, setHours] = useState<Hours>({});
-
-  useEffect(() => {
-    get<ApiResponse<OwnerListing>>('/owner/listing')
-      .then((resp) => {
-        if (resp.data) setExisting(resp.data);
-      })
-      .catch((err) => logger.error('Failed to load owner listing', err))
-      .finally(() => setLoading(false));
-  }, []);
 
   function setDay(day: string, value: string) {
     setHours((prev) => ({ ...prev, [day]: value }));
@@ -92,31 +70,20 @@ export default function CreateBusinessListingPage() {
         setError(resp.error);
         return;
       }
-      if (resp.data) setExisting(resp.data);
       setMessage('Listing submitted. Admin approval is required before it goes live.');
+      setName('');
+      setCategory(CATEGORIES[0]);
+      setAddress('');
+      setCity('');
+      setZip('');
+      setPhone('');
+      setWebsite('');
+      setDescription('');
+      setHours({});
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setError(msg ?? 'Failed to submit listing.');
     }
-  }
-
-  if (loading) return <div className={styles.status}>Loading listing setup...</div>;
-
-  if (existing) {
-    return (
-      <main className={styles.page}>
-        <div className={styles.container}>
-          <h1 className={styles.title}>Your listing status</h1>
-          <p className={styles.statusPill}>{existing.listing_status.toUpperCase()}</p>
-          <p className={styles.summary}>
-            <strong>{existing.name}</strong> in {existing.city}
-          </p>
-          <p className={styles.note}>
-            You already submitted a listing. Once approved, it appears publicly on Circa.
-          </p>
-        </div>
-      </main>
-    );
   }
 
   return (

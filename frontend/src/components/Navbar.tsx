@@ -66,7 +66,8 @@ export default function Navbar() {
         <div className={styles.topRow}>
           <NavLink to={isOwnerWorkspace ? '/owner/dashboard' : '/'} className={styles.brand} end>
             <img src="/acirca_icon_v6.svg" alt="" className={styles.brandIcon} />
-            {isOwnerWorkspace ? 'Circa for Owners' : 'Circa'}
+            <span className={styles.brandWord}>Circa</span>
+            {isOwnerWorkspace && <span className={styles.ownerTag}>for Owners</span>}
           </NavLink>
 
           {!isOwnerWorkspace && (

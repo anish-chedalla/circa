@@ -37,12 +37,23 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  font-weight: 800;
   font-size: 1.1rem;
-  color: #111827;
   text-decoration: none;
   letter-spacing: -0.01em;
   white-space: nowrap;
+}
+
+.brandWord {
+  font-weight: 800;
+  color: #3b4cc0;
+}
+
+.ownerTag {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #9ca3af;
+  letter-spacing: 0.01em;
+  margin-left: 0.05rem;
 }
 
 .brandIcon {

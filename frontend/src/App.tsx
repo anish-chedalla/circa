@@ -6,7 +6,7 @@
  */
 
 import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Navigate, Routes, Route } from 'react-router-dom';
 import LoadingSpinner from './components/LoadingSpinner';
 
 import { AuthProvider } from './context/AuthContext';
@@ -22,7 +22,6 @@ const MapDiscovery = lazy(() => import('./pages/MapDiscovery'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const BusinessRegisterPage = lazy(() => import('./pages/BusinessRegisterPage'));
-const BusinessLoginPage = lazy(() => import('./pages/BusinessLoginPage'));
 const BusinessDetail = lazy(() => import('./pages/BusinessDetail'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const OwnerDashboard = lazy(() => import('./pages/OwnerDashboard'));
@@ -57,7 +56,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/business-register" element={<BusinessRegisterPage />} />
-          <Route path="/business-login" element={<BusinessLoginPage />} />
+          <Route path="/business-login" element={<Navigate to="/login" replace />} />
           <Route path="/business/:id" element={<BusinessDetail />} />
           <Route path="/promote-business" element={<PromoteBusinessPage />} />
 

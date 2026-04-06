@@ -221,6 +221,13 @@ export default function RegisterPage() {
             Login
           </Link>
         </p>
+
+        <p className={styles.footer}>
+          Creating a business owner account?{' '}
+          <Link className={styles.footerLink} to="/business-register">
+            Business owner register
+          </Link>
+        </p>
       </div>
     </div>
   );
