@@ -22,8 +22,8 @@ function formatDate(iso: string | null): string {
  * Renders a review card with reviewer, rating, text, and date.
  */
 export default function ReviewCard({ review }: ReviewCardProps) {
-  const email = review.user?.email ?? 'Anonymous';
-  const displayName = email.split('@')[0];
+  const fallbackEmail = review.user?.email ?? 'Anonymous';
+  const displayName = review.user?.display_name || fallbackEmail;
 
   return (
     <div className={styles.card}>

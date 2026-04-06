@@ -1,9 +1,5 @@
-/**
- * Authenticated user profile page.
- * Shows favorites, recommendations, and account info.
- */
-
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { get, del } from '../services/api';
 import logger from '../services/logger';
@@ -12,16 +8,23 @@ import type { ApiResponse, Business } from '../types';
 import BusinessCard from '../components/BusinessCard';
 import styles from './ProfilePage.module.css';
 
-/**
- * Renders the user profile with favorites list, recommendations, and account info.
- */
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const [favorites, setFavorites] = useState<Business[]>([]);
   const [recommendations, setRecommendations] = useState<Business[]>([]);
   const [recoFallback, setRecoFallback] = useState(false);
   const [favLoading, setFavLoading] = useState(true);
   const [recoLoading, setRecoLoading] = useState(true);
+
+  const [displayName, setDisplayName] = useState(user?.display_name ?? '');
+  const [profileImageUrl, setProfileImageUrl] = useState(user?.profile_image_url ?? '');
+  const [saveMessage, setSaveMessage] = useState('');
+  const [saveError, setSaveError] = useState('');
+
+  useEffect(() => {
+    setDisplayName(user?.display_name ?? '');
+    setProfileImageUrl(user?.profile_image_url ?? '');
+  }, [user?.display_name, user?.profile_image_url]);
 
   useEffect(() => {
     get<ApiResponse<Business[]>>('/favorites')
@@ -34,11 +37,13 @@ export default function ProfilePage() {
         setRecommendations(resp.data ?? []);
         setRecoFallback(resp.meta?.fallback ?? false);
       })
-      .catch((err) => { logger.warn('Recommendations not available', err); setRecoLoading(false); })
+      .catch((err) => {
+        logger.warn('Recommendations not available', err);
+        setRecoLoading(false);
+      })
       .finally(() => setRecoLoading(false));
   }, []);
 
-  /** Remove a business from favorites and update local state. */
   async function unfavorite(businessId: number) {
     try {
       await del(`/favorites/${businessId}`);
@@ -48,22 +53,80 @@ export default function ProfilePage() {
     }
   }
 
+  async function saveProfile() {
+    setSaveError('');
+    setSaveMessage('');
+    const trimmedName = displayName.trim();
+    const trimmedImageUrl = profileImageUrl.trim();
+
+    if (!trimmedName) {
+      setSaveError('Display name is required.');
+      return;
+    }
+
+    try {
+      await updateProfile({
+        display_name: trimmedName,
+        profile_image_url: trimmedImageUrl,
+      });
+      setSaveMessage('Profile updated.');
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setSaveError(msg ?? 'Unable to update profile.');
+      logger.error('Failed to update profile', err);
+    }
+  }
+
   const roleLabelClass =
     user?.role === 'admin' ? styles.roleAdmin
-    : user?.role === 'business_owner' ? styles.roleOwner
-    : styles.roleUser;
+      : user?.role === 'business_owner' ? styles.roleOwner
+        : styles.roleUser;
+
+  const effectiveName = (user?.display_name && user.display_name.trim()) || user?.email || 'User';
 
   return (
-    <div className={styles.page}>
+    <main className={styles.page}>
       <header className={styles.header}>
-        <div className={styles.avatar}>{user?.email[0].toUpperCase()}</div>
+        {user?.profile_image_url ? (
+          <img src={user.profile_image_url} alt={effectiveName} className={styles.avatarImage} />
+        ) : (
+          <div className={styles.avatar}>{effectiveName[0].toUpperCase()}</div>
+        )}
         <div className={styles.userInfo}>
+          <h1 className={styles.name}>{effectiveName}</h1>
           <span className={styles.email}>{user?.email}</span>
-          <span className={`${styles.roleBadge} ${roleLabelClass}`}>
-            {user?.role?.replace('_', ' ')}
-          </span>
+          <span className={`${styles.roleBadge} ${roleLabelClass}`}>{user?.role?.replace('_', ' ')}</span>
         </div>
       </header>
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Profile Settings</h2>
+        <div className={styles.formGrid}>
+          <label className={styles.fieldLabel}>
+            Display Name
+            <input
+              className={styles.input}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="Your display name"
+            />
+          </label>
+          <label className={styles.fieldLabel}>
+            Profile Image URL
+            <input
+              className={styles.input}
+              value={profileImageUrl}
+              onChange={(e) => setProfileImageUrl(e.target.value)}
+              placeholder="https://example.com/photo.jpg"
+            />
+          </label>
+        </div>
+        {saveMessage && <p className={styles.successMsg}>{saveMessage}</p>}
+        {saveError && <p className={styles.errorMsg}>{saveError}</p>}
+        <button className={styles.saveBtn} onClick={() => void saveProfile()}>
+          Save Profile
+        </button>
+      </section>
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>
@@ -71,10 +134,10 @@ export default function ProfilePage() {
           <span className={styles.count}>{favorites.length}</span>
         </h2>
         {favLoading ? (
-          <p className={styles.status}>Loading…</p>
+          <p className={styles.status}>Loading...</p>
         ) : favorites.length === 0 ? (
           <p className={styles.status}>
-            No saved businesses yet. Browse the <a href="/" className={styles.link}>map</a> and bookmark favorites!
+            No saved businesses yet. Browse the <Link to="/" className={styles.link}>map</Link> and bookmark favorites.
           </p>
         ) : (
           <div className={styles.grid}>
@@ -83,10 +146,10 @@ export default function ProfilePage() {
                 <BusinessCard business={biz} />
                 <button
                   className={styles.unfavBtn}
-                  onClick={() => unfavorite(biz.id)}
+                  onClick={() => void unfavorite(biz.id)}
                   title="Remove from favorites"
                 >
-                  ♥ Remove
+                  Remove
                 </button>
               </div>
             ))}
@@ -100,11 +163,9 @@ export default function ProfilePage() {
           {recoFallback && <span className={styles.fallbackNote}>(based on popular picks)</span>}
         </h2>
         {recoLoading ? (
-          <p className={styles.status}>Loading recommendations…</p>
+          <p className={styles.status}>Loading recommendations...</p>
         ) : recommendations.length === 0 ? (
-          <p className={styles.status}>
-            Save 2+ favorites to unlock personalized recommendations.
-          </p>
+          <p className={styles.status}>Save 2+ favorites to unlock personalized recommendations.</p>
         ) : (
           <div className={styles.grid}>
             {recommendations.map((biz) => (
@@ -120,17 +181,22 @@ export default function ProfilePage() {
           <p className={styles.accountLine}><strong>Email:</strong> {user?.email}</p>
           <p className={styles.accountLine}><strong>Role:</strong> {user?.role?.replace('_', ' ')}</p>
           {user?.role === 'business_owner' && (
-            <a href="/owner/dashboard" className={styles.dashboardLink}>
-              Go to Business Dashboard →
-            </a>
+            <Link to="/owner/dashboard" className={styles.dashboardLink}>
+              Go to Business Dashboard
+            </Link>
           )}
           {user?.role === 'user' && (
-            <a href="/claim" className={styles.dashboardLink}>
-              Claim a Business →
-            </a>
+            <Link to="/claim" className={styles.dashboardLink}>
+              Claim a Business
+            </Link>
+          )}
+          {user?.role === 'admin' && (
+            <Link to="/admin" className={styles.dashboardLink}>
+              Go to Admin Dashboard
+            </Link>
           )}
         </div>
       </section>
-    </div>
+    </main>
   );
 }

@@ -44,7 +44,12 @@ export interface ReviewItem {
   rating: number;
   text: string | null;
   created_at: string | null;
-  user: { id: number; email: string } | null;
+  user: {
+    id: number;
+    email: string;
+    display_name?: string | null;
+    profile_image_url?: string | null;
+  } | null;
 }
 
 /** Deal as returned inside a business detail response. */
@@ -65,7 +70,12 @@ export interface Review {
   text: string | null;
   created_at: string;
   updated_at: string;
-  user?: { id: number; email: string };
+  user?: {
+    id: number;
+    email: string;
+    display_name?: string | null;
+    profile_image_url?: string | null;
+  };
 }
 
 /** Represents a promotional deal offered by a business. */
@@ -83,6 +93,8 @@ export interface Deal {
 export interface User {
   id: number;
   email: string;
+  display_name?: string | null;
+  profile_image_url?: string | null;
   role: string;
 }
 

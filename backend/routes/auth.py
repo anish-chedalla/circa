@@ -31,6 +31,7 @@ class RegisterRequest(BaseModel):
     """Payload for the registration endpoint."""
 
     email: EmailStr
+    display_name: str
     password: str
     captcha_token: str
 
@@ -48,6 +49,8 @@ class UserResponse(BaseModel):
 
     id: int
     email: str
+    display_name: str | None
+    profile_image_url: str | None
     role: str
 
 
@@ -58,7 +61,13 @@ class UserResponse(BaseModel):
 
 def _user_dict(user: User) -> dict:
     """Convert a User ORM instance to a plain dict for responses."""
-    return {"id": user.id, "email": user.email, "role": user.role}
+    return {
+        "id": user.id,
+        "email": user.email,
+        "display_name": user.display_name,
+        "profile_image_url": user.profile_image_url,
+        "role": user.role,
+    }
 
 
 def _is_recaptcha_placeholder() -> bool:
@@ -105,6 +114,7 @@ async def register(body: RegisterRequest, db: Session = Depends(get_db)):
     # Create user
     user = User(
         email=body.email,
+        display_name=display_name,
         password_hash=hash_password(body.password),
         role="user",
     )
@@ -148,6 +158,7 @@ async def register_business(body: RegisterRequest, db: Session = Depends(get_db)
 
     user = User(
         email=body.email,
+        display_name=display_name,
         password_hash=hash_password(body.password),
         role="business_owner",
     )
@@ -197,3 +208,68 @@ async def me(current_user: User = Depends(get_current_user)):
         "data": _user_dict(current_user),
         "error": None,
     }
+
+
+class UpdateProfileRequest(BaseModel):
+    """Payload for updating the authenticated user's profile fields."""
+
+    display_name: str | None = None
+    profile_image_url: str | None = None
+
+
+@router.put("/me")
+async def update_me(
+    body: UpdateProfileRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Update profile fields for the currently authenticated user."""
+    if body.display_name is not None:
+        display_name = body.display_name.strip()
+        if not display_name:
+            return JSONResponse(
+                status_code=400,
+                content={"data": None, "error": "Display name cannot be empty"},
+            )
+        if len(display_name) > 120:
+            return JSONResponse(
+                status_code=400,
+                content={"data": None, "error": "Display name must be 120 characters or fewer"},
+            )
+        current_user.display_name = display_name
+
+    if body.profile_image_url is not None:
+        value = body.profile_image_url.strip()
+        if value and not value.startswith(("http://", "https://")):
+            return JSONResponse(
+                status_code=400,
+                content={"data": None, "error": "Profile image URL must start with http:// or https://"},
+            )
+        current_user.profile_image_url = value or None
+
+    db.commit()
+    db.refresh(current_user)
+    return {"data": _user_dict(current_user), "error": None}
+    display_name = body.display_name.strip()
+    if not display_name:
+        return JSONResponse(
+            status_code=400,
+            content={"data": None, "error": "Display name is required"},
+        )
+    if len(display_name) > 120:
+        return JSONResponse(
+            status_code=400,
+            content={"data": None, "error": "Display name must be 120 characters or fewer"},
+        )
+
+    display_name = body.display_name.strip()
+    if not display_name:
+        return JSONResponse(
+            status_code=400,
+            content={"data": None, "error": "Display name is required"},
+        )
+    if len(display_name) > 120:
+        return JSONResponse(
+            status_code=400,
+            content={"data": None, "error": "Display name must be 120 characters or fewer"},
+        )

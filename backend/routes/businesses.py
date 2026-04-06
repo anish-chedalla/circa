@@ -172,6 +172,8 @@ def _serialize_review(review) -> dict:
         "user": {
             "id": review.user.id,
             "email": review.user.email,
+            "display_name": review.user.display_name,
+            "profile_image_url": review.user.profile_image_url,
         } if review.user else None,
     }
 

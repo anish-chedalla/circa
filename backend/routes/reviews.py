@@ -52,7 +52,16 @@ def _serialize_review(review) -> dict:
         "rating": review.rating,
         "text": review.text,
         "created_at": review.created_at.isoformat() if review.created_at else None,
-        "user": {"id": review.user.id, "email": review.user.email} if review.user else None,
+        "user": (
+            {
+                "id": review.user.id,
+                "email": review.user.email,
+                "display_name": review.user.display_name,
+                "profile_image_url": review.user.profile_image_url,
+            }
+            if review.user
+            else None
+        ),
     }
 
 

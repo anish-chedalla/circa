@@ -14,9 +14,9 @@ import {
   type ReactNode,
 } from 'react';
 
-import { get, post } from '../services/api';
+import { get, post, put } from '../services/api';
 import logger from '../services/logger';
-import type { User } from '../types';
+import type { ApiResponse, User } from '../types';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -32,9 +32,21 @@ interface AuthContextValue extends AuthState {
   /** Authenticate with email + password and persist the JWT. */
   login: (email: string, password: string, captchaToken: string) => Promise<User>;
   /** Register a new account (with reCAPTCHA token) and persist the JWT. */
-  register: (email: string, password: string, captchaToken: string) => Promise<void>;
+  register: (
+    email: string,
+    displayName: string,
+    password: string,
+    captchaToken: string,
+  ) => Promise<void>;
   /** Register a new business-owner account and persist the JWT. */
-  registerBusiness: (email: string, password: string, captchaToken: string) => Promise<void>;
+  registerBusiness: (
+    email: string,
+    displayName: string,
+    password: string,
+    captchaToken: string,
+  ) => Promise<void>;
+  /** Update profile display name and/or profile image URL. */
+  updateProfile: (payload: { display_name?: string; profile_image_url?: string }) => Promise<User>;
   /** Clear the session and remove the stored JWT. */
   logout: () => void;
 }
@@ -111,9 +123,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /* ---------- register -------------------------------------------- */
   const register = useCallback(
-    async (email: string, password: string, captchaToken: string) => {
+    async (email: string, displayName: string, password: string, captchaToken: string) => {
       const resp = await post<AuthTokenResponse>('/auth/register', {
         email,
+        display_name: displayName,
         password,
         captcha_token: captchaToken,
       });
@@ -128,9 +141,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /* ---------- business register ----------------------------------- */
   const registerBusiness = useCallback(
-    async (email: string, password: string, captchaToken: string) => {
+    async (email: string, displayName: string, password: string, captchaToken: string) => {
       const resp = await post<AuthTokenResponse>('/auth/register-business', {
         email,
+        display_name: displayName,
         password,
         captcha_token: captchaToken,
       });
@@ -139,6 +153,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
       localStorage.setItem('token', token);
       setState({ user, token, loading: false });
       logger.info('Business owner registered', user.email);
+    },
+    [],
+  );
+
+  /* ---------- update profile ------------------------------------- */
+  const updateProfile = useCallback(
+    async (payload: { display_name?: string; profile_image_url?: string }) => {
+      const resp = await put<ApiResponse<User>>(
+        '/auth/me',
+        payload,
+      );
+      if (resp.error || !resp.data) throw new Error(resp.error ?? 'Profile update failed');
+      setState((prev) => ({ ...prev, user: resp.data }));
+      return resp.data;
     },
     [],
   );
@@ -152,8 +180,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /* ---------- memoised context value ------------------------------ */
   const value = useMemo<AuthContextValue>(
-    () => ({ ...state, login, register, registerBusiness, logout }),
-    [state, login, register, registerBusiness, logout],
+    () => ({ ...state, login, register, registerBusiness, updateProfile, logout }),
+    [state, login, register, registerBusiness, updateProfile, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

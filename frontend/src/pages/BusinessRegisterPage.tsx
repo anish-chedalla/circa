@@ -10,6 +10,7 @@ import styles from './BusinessRegisterPage.module.css';
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY as string | undefined;
 
 interface FieldErrors {
+  displayName?: string;
   email?: string;
   password?: string;
   confirmPassword?: string;
@@ -17,8 +18,15 @@ interface FieldErrors {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function validateFields(email: string, password: string, confirmPassword: string): FieldErrors {
+function validateFields(
+  displayName: string,
+  email: string,
+  password: string,
+  confirmPassword: string,
+): FieldErrors {
   const errors: FieldErrors = {};
+  if (!displayName.trim()) errors.displayName = 'Display name is required.';
+  else if (displayName.trim().length > 120) errors.displayName = 'Display name must be 120 characters or fewer.';
   if (!email.trim()) errors.email = 'Email is required.';
   else if (!EMAIL_REGEX.test(email)) errors.email = 'Please enter a valid email address.';
   if (!password) errors.password = 'Password is required.';
@@ -43,6 +51,7 @@ export default function BusinessRegisterPage() {
   const captchaRef = useRef<ReCAPTCHA | null>(null);
 
   const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -53,12 +62,12 @@ export default function BusinessRegisterPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setApiError('');
-    const errors = validateFields(email, password, confirmPassword);
+    const errors = validateFields(displayName, email, password, confirmPassword);
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
     setSubmitting(true);
     try {
-      await registerBusiness(email, password, captchaToken ?? '');
+      await registerBusiness(email, displayName.trim(), password, captchaToken ?? '');
       navigate('/owner/new-listing', { replace: true });
     } catch (err) {
       const message = extractApiError(err);
@@ -73,75 +82,102 @@ export default function BusinessRegisterPage() {
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Create a business account</h1>
-        <p className={styles.subtitle}>Submit your listing for admin approval.</p>
-        <form className={styles.form} onSubmit={handleSubmit} noValidate>
-          {apiError && <p className={styles.apiError}>{apiError}</p>}
+      <div className={styles.backdrop} />
+      <div className={styles.layout}>
+        <aside className={styles.leftRail}>
+          <p className={styles.railLabel}>Owner account</p>
+          <h1 className={styles.railTitle}>Register your business access</h1>
+          <p className={styles.railText}>
+            Create an owner account to submit listings and manage your business dashboard.
+          </p>
+          <div className={styles.railLinks}>
+            <p>
+              Already have an owner account? <Link to="/login">Login</Link>
+            </p>
+            <p>
+              Need a standard user account? <Link to="/register">User register</Link>
+            </p>
+          </div>
+        </aside>
 
-          <label className={styles.label}>
-            Email
-            <input
-              className={styles.input}
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="owner@business.com"
-            />
-            {fieldErrors.email && <span className={styles.fieldError}>{fieldErrors.email}</span>}
-          </label>
+        <div className={styles.card}>
+          <h2 className={styles.title}>Register as business owner</h2>
+          <p className={styles.subtitle}>Submit your listing for admin approval.</p>
+          <form className={styles.form} onSubmit={handleSubmit} noValidate>
+            {apiError && <p className={styles.apiError}>{apiError}</p>}
 
-          <label className={styles.label}>
-            Password
-            <input
-              className={styles.input}
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 8 characters and 1 digit"
-            />
-            {fieldErrors.password && <span className={styles.fieldError}>{fieldErrors.password}</span>}
-          </label>
-
-          <label className={styles.label}>
-            Confirm Password
-            <input
-              className={styles.input}
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Re-enter password"
-            />
-            {fieldErrors.confirmPassword && (
-              <span className={styles.fieldError}>{fieldErrors.confirmPassword}</span>
-            )}
-          </label>
-
-          {RECAPTCHA_SITE_KEY ? (
-            <div className={styles.captchaWrap}>
-              <ReCAPTCHA
-                ref={captchaRef}
-                sitekey={RECAPTCHA_SITE_KEY}
-                onChange={(token) => setCaptchaToken(token)}
-                onExpired={() => setCaptchaToken(null)}
+            <label className={styles.label}>
+              Display Name
+              <input
+                className={styles.input}
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Your name"
               />
-            </div>
-          ) : (
-            <p className={styles.note}>reCAPTCHA not configured.</p>
-          )}
+              {fieldErrors.displayName && <span className={styles.fieldError}>{fieldErrors.displayName}</span>}
+            </label>
 
-          <button className={styles.submitBtn} type="submit" disabled={submitting}>
-            {submitting ? 'Creating account...' : 'Create business account'}
-          </button>
-        </form>
+            <label className={styles.label}>
+              Email
+              <input
+                className={styles.input}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="owner@business.com"
+              />
+              {fieldErrors.email && <span className={styles.fieldError}>{fieldErrors.email}</span>}
+            </label>
 
-        <p className={styles.footer}>
-          Already have a business account? <Link to="/login">Login</Link>
-        </p>
+            <label className={styles.label}>
+              Password
+              <input
+                className={styles.input}
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 8 characters and 1 digit"
+              />
+              {fieldErrors.password && <span className={styles.fieldError}>{fieldErrors.password}</span>}
+            </label>
 
-        <p className={styles.footer}>
-          Need a standard user account? <Link to="/register">User register</Link>
-        </p>
+            <label className={styles.label}>
+              Confirm Password
+              <input
+                className={styles.input}
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter password"
+              />
+              {fieldErrors.confirmPassword && (
+                <span className={styles.fieldError}>{fieldErrors.confirmPassword}</span>
+              )}
+            </label>
+
+            {RECAPTCHA_SITE_KEY ? (
+              <div className={styles.captchaWrap}>
+                <ReCAPTCHA
+                  ref={captchaRef}
+                  sitekey={RECAPTCHA_SITE_KEY}
+                  onChange={(token) => setCaptchaToken(token)}
+                  onExpired={() => setCaptchaToken(null)}
+                />
+              </div>
+            ) : (
+              <p className={styles.note}>reCAPTCHA not configured.</p>
+            )}
+
+            <button className={styles.submitBtn} type="submit" disabled={submitting}>
+              {submitting ? 'Creating account...' : 'Create business account'}
+            </button>
+          </form>
+
+          <p className={styles.footer}>
+            Already have a business account? <Link to="/login">Login</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

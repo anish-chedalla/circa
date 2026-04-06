@@ -1,11 +1,3 @@
-/**
- * User registration page.
- *
- * Provides email/password sign-up with client-side validation,
- * Google reCAPTCHA v2, and inline error display. Redirects to the
- * home page on successful registration.
- */
-
 import { useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -19,25 +11,28 @@ const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY as
   | string
   | undefined;
 
-/** Email regex pattern for basic format validation. */
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** Field-level validation errors. */
 interface FieldErrors {
+  displayName?: string;
   email?: string;
   password?: string;
   confirmPassword?: string;
 }
 
-/**
- * Validates registration form fields and returns any errors found.
- */
 function validateFields(
+  displayName: string,
   email: string,
   password: string,
   confirmPassword: string,
 ): FieldErrors {
   const errors: FieldErrors = {};
+
+  if (!displayName.trim()) {
+    errors.displayName = 'Display name is required.';
+  } else if (displayName.trim().length > 120) {
+    errors.displayName = 'Display name must be 120 characters or fewer.';
+  }
 
   if (!email.trim()) {
     errors.email = 'Email is required.';
@@ -62,9 +57,6 @@ function validateFields(
   return errors;
 }
 
-/**
- * Extracts a user-friendly message from an API error response.
- */
 function extractApiError(error: unknown): string {
   if (axios.isAxiosError(error)) {
     const detail = error.response?.data?.detail;
@@ -75,15 +67,13 @@ function extractApiError(error: unknown): string {
   return 'An unexpected error occurred. Please try again.';
 }
 
-/**
- * Renders the registration form for new user sign-up.
- */
 export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const captchaRef = useRef<ReCAPTCHA | null>(null);
 
   const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -91,22 +81,19 @@ export default function RegisterPage() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  /** Handle form submission. */
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setApiError(null);
 
-    const errors = validateFields(email, password, confirmPassword);
+    const errors = validateFields(displayName, email, password, confirmPassword);
     setFieldErrors(errors);
-
     if (Object.keys(errors).length > 0) {
       return;
     }
 
     setSubmitting(true);
-
     try {
-      await register(email, password, captchaToken ?? '');
+      await register(email, displayName.trim(), password, captchaToken ?? '');
       navigate('/', { replace: true });
     } catch (err: unknown) {
       const message = extractApiError(err);
@@ -121,113 +108,130 @@ export default function RegisterPage() {
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Create an account</h1>
-        <p className={styles.subtitle}>
-          Join to discover local businesses near you
-        </p>
-
-        <form className={styles.form} onSubmit={handleSubmit} noValidate>
-          {apiError && <div className={styles.apiError}>{apiError}</div>}
-
-          {/* Email */}
-          <div className={styles.fieldGroup}>
-            <label className={styles.label} htmlFor="register-email">
-              Email
-            </label>
-            <input
-              id="register-email"
-              className={`${styles.input} ${fieldErrors.email ? styles.inputError : ''}`}
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            {fieldErrors.email && (
-              <span className={styles.fieldError}>{fieldErrors.email}</span>
-            )}
-          </div>
-
-          {/* Password */}
-          <div className={styles.fieldGroup}>
-            <label className={styles.label} htmlFor="register-password">
-              Password
-            </label>
-            <input
-              id="register-password"
-              className={`${styles.input} ${fieldErrors.password ? styles.inputError : ''}`}
-              type="password"
-              placeholder="Min 8 chars, at least one digit"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            {fieldErrors.password && (
-              <span className={styles.fieldError}>{fieldErrors.password}</span>
-            )}
-          </div>
-
-          {/* Confirm Password */}
-          <div className={styles.fieldGroup}>
-            <label className={styles.label} htmlFor="register-confirm">
-              Confirm Password
-            </label>
-            <input
-              id="register-confirm"
-              className={`${styles.input} ${fieldErrors.confirmPassword ? styles.inputError : ''}`}
-              type="password"
-              placeholder="Re-enter your password"
-              autoComplete="new-password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-            {fieldErrors.confirmPassword && (
-              <span className={styles.fieldError}>
-                {fieldErrors.confirmPassword}
-              </span>
-            )}
-          </div>
-
-          {/* reCAPTCHA */}
-          {RECAPTCHA_SITE_KEY ? (
-            <div className={styles.captchaWrapper}>
-              <ReCAPTCHA
-                ref={captchaRef}
-                sitekey={RECAPTCHA_SITE_KEY}
-                onChange={(token) => setCaptchaToken(token)}
-                onExpired={() => setCaptchaToken(null)}
-              />
-            </div>
-          ) : (
-            <p className={styles.captchaNote}>
-              reCAPTCHA not configured — registration will proceed without
-              verification.
+      <div className={styles.backdrop} />
+      <div className={styles.layout}>
+        <aside className={styles.leftRail}>
+          <p className={styles.railLabel}>User account</p>
+          <h1 className={styles.railTitle}>Create your Circa account</h1>
+          <p className={styles.railText}>
+            Join to discover and support local businesses around your community.
+          </p>
+          <div className={styles.railLinks}>
+            <p>
+              Already have an account?{' '}
+              <Link className={styles.footerLink} to="/login">
+                Login
+              </Link>
             </p>
-          )}
+            <p>
+              Need an owner account?{' '}
+              <Link className={styles.footerLink} to="/business-register">
+                Business owner register
+              </Link>
+            </p>
+          </div>
+        </aside>
 
-          <button
-            className={styles.submitBtn}
-            type="submit"
-            disabled={submitting}
-          >
-            {submitting ? 'Creating account...' : 'Create account'}
-          </button>
-        </form>
+        <div className={styles.card}>
+          <h2 className={styles.title}>Register as user</h2>
+          <p className={styles.subtitle}>Create your account credentials</p>
 
-        <p className={styles.footer}>
-          Already have an account?{' '}
-          <Link className={styles.footerLink} to="/login">
-            Login
-          </Link>
-        </p>
+          <form className={styles.form} onSubmit={handleSubmit} noValidate>
+            {apiError && <div className={styles.apiError}>{apiError}</div>}
 
-        <p className={styles.footer}>
-          Creating a business owner account?{' '}
-          <Link className={styles.footerLink} to="/business-register">
-            Business owner register
-          </Link>
-        </p>
+            <div className={styles.fieldGroup}>
+              <label className={styles.label} htmlFor="register-display-name">
+                Display Name
+              </label>
+              <input
+                id="register-display-name"
+                className={`${styles.input} ${fieldErrors.displayName ? styles.inputError : ''}`}
+                type="text"
+                placeholder="Your name"
+                autoComplete="nickname"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+              />
+              {fieldErrors.displayName && <span className={styles.fieldError}>{fieldErrors.displayName}</span>}
+            </div>
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.label} htmlFor="register-email">
+                Email
+              </label>
+              <input
+                id="register-email"
+                className={`${styles.input} ${fieldErrors.email ? styles.inputError : ''}`}
+                type="email"
+                placeholder="you@example.com"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {fieldErrors.email && <span className={styles.fieldError}>{fieldErrors.email}</span>}
+            </div>
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.label} htmlFor="register-password">
+                Password
+              </label>
+              <input
+                id="register-password"
+                className={`${styles.input} ${fieldErrors.password ? styles.inputError : ''}`}
+                type="password"
+                placeholder="Min 8 chars, at least one digit"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              {fieldErrors.password && <span className={styles.fieldError}>{fieldErrors.password}</span>}
+            </div>
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.label} htmlFor="register-confirm">
+                Confirm Password
+              </label>
+              <input
+                id="register-confirm"
+                className={`${styles.input} ${fieldErrors.confirmPassword ? styles.inputError : ''}`}
+                type="password"
+                placeholder="Re-enter your password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              {fieldErrors.confirmPassword && (
+                <span className={styles.fieldError}>{fieldErrors.confirmPassword}</span>
+              )}
+            </div>
+
+            {RECAPTCHA_SITE_KEY ? (
+              <div className={styles.captchaWrapper}>
+                <ReCAPTCHA
+                  ref={captchaRef}
+                  sitekey={RECAPTCHA_SITE_KEY}
+                  onChange={(token) => setCaptchaToken(token)}
+                  onExpired={() => setCaptchaToken(null)}
+                />
+              </div>
+            ) : (
+              <p className={styles.captchaNote}>
+                reCAPTCHA not configured - registration will proceed without verification.
+              </p>
+            )}
+
+            <button className={styles.submitBtn} type="submit" disabled={submitting}>
+              {submitting ? 'Creating account...' : 'Create account'}
+            </button>
+          </form>
+
+          <p className={styles.footer}>
+            Already have an account?{' '}
+            <Link className={styles.footerLink} to="/login">
+              Login
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

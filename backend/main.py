@@ -7,8 +7,11 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 
-from backend.database import Base, engine
+from backend.database import Base, SessionLocal, engine
+from backend.models.user import User
+from backend.services.verification_system import hash_password
 
 # Load environment variables before anything else
 _env_path = Path(__file__).resolve().parent.parent / ".env"
@@ -23,6 +26,7 @@ async def lifespan(app: FastAPI):
 
     Base.metadata.create_all(bind=engine)
     _ensure_google_enrichment_columns()
+    _ensure_default_admin_user()
     yield
 
 
@@ -44,6 +48,8 @@ def _ensure_google_enrichment_columns() -> None:
         "CREATE INDEX IF NOT EXISTS ix_business_events_business_id ON business_events (business_id)",
         "CREATE INDEX IF NOT EXISTS ix_business_events_event_type ON business_events (event_type)",
         "CREATE INDEX IF NOT EXISTS ix_business_events_created_at ON business_events (created_at)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name VARCHAR(120)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image_url VARCHAR(1024)",
         "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_place_id VARCHAR(128)",
         "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_photo_ref VARCHAR(512)",
         "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_photo_url VARCHAR(1024)",
@@ -55,6 +61,35 @@ def _ensure_google_enrichment_columns() -> None:
     with engine.begin() as conn:
         for stmt in statements:
             conn.execute(text(stmt))
+
+
+def _ensure_default_admin_user() -> None:
+    """Create or update a default admin login for local/demo use."""
+    admin_email = "anish@circa.org"
+    admin_password = "Anish1234"
+
+    db: Session = SessionLocal()
+    try:
+        user = db.query(User).filter(User.email == admin_email).first()
+        if user is None:
+            user = User(
+                email=admin_email,
+                display_name="Anish",
+                password_hash=hash_password(admin_password),
+                role="admin",
+                is_active=True,
+            )
+            db.add(user)
+            db.commit()
+            return
+
+        user.password_hash = hash_password(admin_password)
+        user.display_name = user.display_name or "Anish"
+        user.role = "admin"
+        user.is_active = True
+        db.commit()
+    finally:
+        db.close()
 
 
 app = FastAPI(

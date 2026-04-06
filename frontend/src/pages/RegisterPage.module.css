@@ -1,39 +1,103 @@
 .wrapper {
+  position: relative;
+  min-height: calc(100vh - 56px);
   display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: flex-start;
-  padding: 3rem 1rem;
-  min-height: calc(100vh - 60px);
-  background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
+  padding: 2rem 1rem;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(8, 10, 20, 0.48), rgba(8, 10, 20, 0.48)),
+    url('/about/small-business.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.layout {
+  position: relative;
+  z-index: 1;
+  width: min(1020px, 100%);
+  display: grid;
+  grid-template-columns: 320px minmax(320px, 500px);
+  justify-content: center;
+}
+
+.leftRail {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e5e7eb;
+  border-right: none;
+  border-radius: 14px 0 0 14px;
+  padding: 2.1rem 1.6rem;
+  color: #111827;
+}
+
+.railLabel {
+  margin: 0;
+  color: #6b7280;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.railTitle {
+  margin: 0.4rem 0 0;
+  font-size: 1.65rem;
+  line-height: 1.2;
+  font-family: var(--serif, Georgia, 'Times New Roman', serif);
+}
+
+.railText {
+  margin: 0.75rem 0 0;
+  color: #4b5563;
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+.railLinks {
+  margin-top: 1.6rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.railLinks p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.45;
 }
 
 .card {
-  width: 100%;
-  max-width: 420px;
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 2.5rem 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+  border-radius: 0 14px 14px 0;
+  padding: 2rem 1.8rem;
 }
 
 .title {
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 700;
   color: #111827;
-  margin-bottom: 0.25rem;
+  margin: 0;
 }
 
 .subtitle {
   font-size: 0.95rem;
-  color: #4b5563;
-  margin-bottom: 1.75rem;
+  color: #6b7280;
+  margin: 0.32rem 0 1.35rem;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.05rem;
 }
 
 .fieldGroup {
@@ -44,7 +108,7 @@
 
 .label {
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   color: #111827;
 }
 
@@ -53,7 +117,7 @@
   padding: 0.6rem 0.75rem;
   font-size: 0.95rem;
   font-family: var(--sans, system-ui, sans-serif);
-  border: 1px solid #e5e7eb;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
   background: #ffffff;
   color: #111827;
@@ -62,8 +126,8 @@
 }
 
 .input::placeholder {
-  color: #4b5563;
-  opacity: 0.5;
+  color: #6b7280;
+  opacity: 0.75;
 }
 
 .input:focus {
@@ -87,12 +151,26 @@
 
 .apiError {
   font-size: 0.875rem;
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.06);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
   border-radius: 8px;
   padding: 0.6rem 0.75rem;
   text-align: center;
+}
+
+.captchaWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.captchaNote {
+  font-size: 0.82rem;
+  color: #4b5563;
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
 }
 
 .submitBtn {
@@ -118,32 +196,38 @@
   cursor: not-allowed;
 }
 
-.captchaWrapper {
-  display: flex;
-  justify-content: center;
-}
-
-.captchaNote {
-  font-size: 0.8rem;
-  color: #4b5563;
-  text-align: center;
-  font-style: italic;
-}
-
 .footer {
   text-align: center;
-  margin-top: 1.5rem;
+  margin-top: 1.3rem;
   font-size: 0.9rem;
   color: #4b5563;
+  line-height: 1.45;
 }
 
 .footerLink {
   color: #3b4cc0;
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: none;
 }
 
 .footerLink:hover {
   color: #2f3ea3;
   text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+
+  .leftRail {
+    border-right: 1px solid #e5e7eb;
+    border-bottom: none;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .card {
+    border-radius: 0 0 14px 14px;
+  }
 }
