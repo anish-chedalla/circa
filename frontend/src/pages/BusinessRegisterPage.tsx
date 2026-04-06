@@ -40,7 +40,19 @@ function validateFields(
 
 function extractApiError(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    return error.response?.data?.error ?? error.response?.data?.detail ?? 'Unable to create business account.';
+    const apiError = error.response?.data?.error;
+    if (typeof apiError === 'string' && apiError.trim()) {
+      return apiError;
+    }
+    const detail = error.response?.data?.detail;
+    if (typeof detail === 'string' && detail.trim()) {
+      return detail;
+    }
+    const message = error.response?.data?.message;
+    if (typeof message === 'string' && message.trim()) {
+      return message;
+    }
+    return 'Unable to create business account.';
   }
   return 'Unable to create business account.';
 }
@@ -54,6 +66,8 @@ export default function BusinessRegisterPage() {
   const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [apiError, setApiError] = useState('');
@@ -132,25 +146,45 @@ export default function BusinessRegisterPage() {
 
             <label className={styles.label}>
               Password
-              <input
-                className={styles.input}
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 8 characters and 1 digit"
-              />
+              <div className={styles.passwordRow}>
+                <input
+                  className={styles.input}
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 8 characters and 1 digit"
+                />
+                <button
+                  type="button"
+                  className={styles.toggleBtn}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
               {fieldErrors.password && <span className={styles.fieldError}>{fieldErrors.password}</span>}
             </label>
 
             <label className={styles.label}>
               Confirm Password
-              <input
-                className={styles.input}
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter password"
-              />
+              <div className={styles.passwordRow}>
+                <input
+                  className={styles.input}
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter password"
+                />
+                <button
+                  type="button"
+                  className={styles.toggleBtn}
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                >
+                  {showConfirmPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
               {fieldErrors.confirmPassword && (
                 <span className={styles.fieldError}>{fieldErrors.confirmPassword}</span>
               )}

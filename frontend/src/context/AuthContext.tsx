@@ -47,6 +47,8 @@ interface AuthContextValue extends AuthState {
   ) => Promise<void>;
   /** Update profile display name and/or profile image URL. */
   updateProfile: (payload: { display_name?: string; profile_image_url?: string }) => Promise<User>;
+  /** Upload a profile avatar image file and persist URL on the user profile. */
+  uploadProfileImage: (file: File) => Promise<User>;
   /** Clear the session and remove the stored JWT. */
   logout: () => void;
 }
@@ -171,6 +173,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [],
   );
 
+  /* ---------- upload profile image ------------------------------------- */
+  const uploadProfileImage = useCallback(async (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    const resp = await post<ApiResponse<User>>('/auth/me/avatar', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    if (resp.error || !resp.data) throw new Error(resp.error ?? 'Avatar upload failed');
+    setState((prev) => ({ ...prev, user: resp.data }));
+    return resp.data;
+  }, []);
+
   /* ---------- logout ---------------------------------------------- */
   const logout = useCallback(() => {
     localStorage.removeItem('token');
@@ -180,8 +194,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /* ---------- memoised context value ------------------------------ */
   const value = useMemo<AuthContextValue>(
-    () => ({ ...state, login, register, registerBusiness, updateProfile, logout }),
-    [state, login, register, registerBusiness, updateProfile, logout],
+    () => ({
+      ...state,
+      login,
+      register,
+      registerBusiness,
+      updateProfile,
+      uploadProfileImage,
+      logout,
+    }),
+    [state, login, register, registerBusiness, updateProfile, uploadProfileImage, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

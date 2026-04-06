@@ -262,6 +262,9 @@ export default function OwnerDashboard() {
           <Link to="/owner/new-listing" className={styles.primaryLink}>
             + New Business Listing
           </Link>
+          <Link to="/claim" className={styles.secondaryLink}>
+            Claim Existing Listing
+          </Link>
           <label className={styles.selectorLabel}>
             Select business
             <select

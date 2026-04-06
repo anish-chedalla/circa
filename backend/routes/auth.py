@@ -2,8 +2,10 @@
 
 import os
 import re
+from pathlib import Path
+from uuid import uuid4
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, Request, UploadFile
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
@@ -25,6 +27,14 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 # ---------------------------------------------------------------------------
 
 _PASSWORD_PATTERN = re.compile(r"^(?=.*\d).{8,}$")
+_UPLOAD_DIR = Path(__file__).resolve().parents[2] / "uploads" / "profile-images"
+_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+_ALLOWED_IMAGE_TYPES = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+}
+_MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
 
 class RegisterRequest(BaseModel):
@@ -76,6 +86,13 @@ def _is_recaptcha_placeholder() -> bool:
     return secret == "your-recaptcha-secret-key"
 
 
+def _extension_for_upload(file: UploadFile) -> str | None:
+    """Return allowed extension for upload mime-type, else None."""
+    if not file.content_type:
+        return None
+    return _ALLOWED_IMAGE_TYPES.get(file.content_type.lower())
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
@@ -112,6 +129,18 @@ async def register(body: RegisterRequest, db: Session = Depends(get_db)):
         )
 
     # Create user
+    display_name = body.display_name.strip()
+    if not display_name:
+        return JSONResponse(
+            status_code=400,
+            content={"data": None, "error": "Display name is required"},
+        )
+    if len(display_name) > 120:
+        return JSONResponse(
+            status_code=400,
+            content={"data": None, "error": "Display name must be 120 characters or fewer"},
+        )
+
     user = User(
         email=body.email,
         display_name=display_name,
@@ -154,6 +183,18 @@ async def register_business(body: RegisterRequest, db: Session = Depends(get_db)
         return JSONResponse(
             status_code=409,
             content={"data": None, "error": "Email is already registered"},
+        )
+
+    display_name = body.display_name.strip()
+    if not display_name:
+        return JSONResponse(
+            status_code=400,
+            content={"data": None, "error": "Display name is required"},
+        )
+    if len(display_name) > 120:
+        return JSONResponse(
+            status_code=400,
+            content={"data": None, "error": "Display name must be 120 characters or fewer"},
         )
 
     user = User(
@@ -250,26 +291,45 @@ async def update_me(
     db.commit()
     db.refresh(current_user)
     return {"data": _user_dict(current_user), "error": None}
-    display_name = body.display_name.strip()
-    if not display_name:
+
+
+@router.post("/me/avatar")
+async def upload_avatar(
+    request: Request,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Upload and save a profile avatar image for the authenticated user."""
+    ext = _extension_for_upload(file)
+    if not ext:
         return JSONResponse(
             status_code=400,
-            content={"data": None, "error": "Display name is required"},
-        )
-    if len(display_name) > 120:
-        return JSONResponse(
-            status_code=400,
-            content={"data": None, "error": "Display name must be 120 characters or fewer"},
+            content={
+                "data": None,
+                "error": "Unsupported image type. Use JPEG, PNG, or WEBP.",
+            },
         )
 
-    display_name = body.display_name.strip()
-    if not display_name:
+    content = await file.read()
+    if not content:
         return JSONResponse(
             status_code=400,
-            content={"data": None, "error": "Display name is required"},
+            content={"data": None, "error": "Uploaded file is empty"},
         )
-    if len(display_name) > 120:
+    if len(content) > _MAX_IMAGE_BYTES:
         return JSONResponse(
             status_code=400,
-            content={"data": None, "error": "Display name must be 120 characters or fewer"},
+            content={"data": None, "error": "Image is too large (max 5 MB)"},
         )
+
+    filename = f"{current_user.id}-{uuid4().hex}{ext}"
+    saved_path = _UPLOAD_DIR / filename
+    with open(saved_path, "wb") as out:
+        out.write(content)
+
+    avatar_url = str(request.url_for("uploads", path=f"profile-images/{filename}"))
+    current_user.profile_image_url = avatar_url
+    db.commit()
+    db.refresh(current_user)
+    return {"data": _user_dict(current_user), "error": None}

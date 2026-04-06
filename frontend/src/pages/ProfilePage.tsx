@@ -9,7 +9,7 @@ import BusinessCard from '../components/BusinessCard';
 import styles from './ProfilePage.module.css';
 
 export default function ProfilePage() {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, uploadProfileImage } = useAuth();
   const [favorites, setFavorites] = useState<Business[]>([]);
   const [recommendations, setRecommendations] = useState<Business[]>([]);
   const [recoFallback, setRecoFallback] = useState(false);
@@ -17,13 +17,13 @@ export default function ProfilePage() {
   const [recoLoading, setRecoLoading] = useState(true);
 
   const [displayName, setDisplayName] = useState(user?.display_name ?? '');
-  const [profileImageUrl, setProfileImageUrl] = useState(user?.profile_image_url ?? '');
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
   const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     setDisplayName(user?.display_name ?? '');
-    setProfileImageUrl(user?.profile_image_url ?? '');
   }, [user?.display_name, user?.profile_image_url]);
 
   useEffect(() => {
@@ -57,23 +57,39 @@ export default function ProfilePage() {
     setSaveError('');
     setSaveMessage('');
     const trimmedName = displayName.trim();
-    const trimmedImageUrl = profileImageUrl.trim();
-
     if (!trimmedName) {
       setSaveError('Display name is required.');
       return;
     }
 
     try {
-      await updateProfile({
-        display_name: trimmedName,
-        profile_image_url: trimmedImageUrl,
-      });
+      await updateProfile({ display_name: trimmedName });
       setSaveMessage('Profile updated.');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setSaveError(msg ?? 'Unable to update profile.');
       logger.error('Failed to update profile', err);
+    }
+  }
+
+  async function uploadAvatar() {
+    if (!selectedImageFile) {
+      setSaveError('Please choose an image file first.');
+      return;
+    }
+    setSaveError('');
+    setSaveMessage('');
+    setUploadingImage(true);
+    try {
+      await uploadProfileImage(selectedImageFile);
+      setSaveMessage('Profile picture updated.');
+      setSelectedImageFile(null);
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setSaveError(msg ?? 'Unable to upload profile picture.');
+      logger.error('Failed to upload profile image', err);
+    } finally {
+      setUploadingImage(false);
     }
   }
 
@@ -111,14 +127,26 @@ export default function ProfilePage() {
               placeholder="Your display name"
             />
           </label>
+
           <label className={styles.fieldLabel}>
-            Profile Image URL
+            Profile Picture
             <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
               className={styles.input}
-              value={profileImageUrl}
-              onChange={(e) => setProfileImageUrl(e.target.value)}
-              placeholder="https://example.com/photo.jpg"
+              onChange={(e) => setSelectedImageFile(e.target.files?.[0] ?? null)}
             />
+            <span className={styles.uploadHint}>
+              Upload JPG, PNG, or WEBP (max 5 MB).
+            </span>
+            <button
+              type="button"
+              className={styles.uploadBtn}
+              onClick={() => void uploadAvatar()}
+              disabled={uploadingImage}
+            >
+              {uploadingImage ? 'Uploading...' : 'Upload Picture'}
+            </button>
           </label>
         </div>
         {saveMessage && <p className={styles.successMsg}>{saveMessage}</p>}
@@ -181,13 +209,18 @@ export default function ProfilePage() {
           <p className={styles.accountLine}><strong>Email:</strong> {user?.email}</p>
           <p className={styles.accountLine}><strong>Role:</strong> {user?.role?.replace('_', ' ')}</p>
           {user?.role === 'business_owner' && (
-            <Link to="/owner/dashboard" className={styles.dashboardLink}>
-              Go to Business Dashboard
-            </Link>
+            <>
+              <Link to="/owner/dashboard" className={styles.dashboardLink}>
+                Go to Business Dashboard
+              </Link>
+              <Link to="/claim" className={styles.dashboardLink}>
+                Claim an Existing Listing
+              </Link>
+            </>
           )}
           {user?.role === 'user' && (
-            <Link to="/claim" className={styles.dashboardLink}>
-              Claim a Business
+            <Link to="/promote-business" className={styles.dashboardLink}>
+              Promote Your Business
             </Link>
           )}
           {user?.role === 'admin' && (

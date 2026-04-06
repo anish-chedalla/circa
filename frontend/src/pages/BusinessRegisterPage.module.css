@@ -132,6 +132,28 @@
   box-shadow: 0 0 0 3px rgba(59, 76, 192, 0.14);
 }
 
+.passwordRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toggleBtn {
+  border: 1px solid #c7d2fe;
+  background: #eef2ff;
+  color: #3730a3;
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+  min-width: 56px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.toggleBtn:hover {
+  background: #e0e7ff;
+}
+
 .fieldError {
   font-size: 0.8rem;
   color: #ef4444;

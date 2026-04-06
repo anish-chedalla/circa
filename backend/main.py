@@ -5,6 +5,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -16,6 +17,8 @@ from backend.services.verification_system import hash_password
 # Load environment variables before anything else
 _env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(_env_path)
+_uploads_dir = Path(__file__).resolve().parent.parent / "uploads"
+_uploads_dir.mkdir(parents=True, exist_ok=True)
 
 
 @asynccontextmanager
@@ -100,6 +103,7 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+app.mount("/uploads", StaticFiles(directory=_uploads_dir), name="uploads")
 
 # ---------------------------------------------------------------------------
 # CORS — allow all origins during development

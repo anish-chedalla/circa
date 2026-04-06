@@ -46,9 +46,17 @@ function validateFields(email: string, password: string): FieldErrors {
  */
 function extractApiError(error: unknown): string {
   if (axios.isAxiosError(error)) {
+    const apiError = error.response?.data?.error;
+    if (typeof apiError === 'string' && apiError.trim()) {
+      return apiError;
+    }
     const detail = error.response?.data?.detail;
     if (typeof detail === 'string') {
       return detail;
+    }
+    const message = error.response?.data?.message;
+    if (typeof message === 'string' && message.trim()) {
+      return message;
     }
   }
   return 'An unexpected error occurred. Please try again.';
@@ -65,6 +73,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -158,15 +167,25 @@ export default function LoginPage() {
               <label className={styles.label} htmlFor="login-password">
                 Password
               </label>
-              <input
-                id="login-password"
-                className={`${styles.input} ${fieldErrors.password ? styles.inputError : ''}`}
-                type="password"
-                placeholder="Your password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div className={styles.passwordRow}>
+                <input
+                  id="login-password"
+                  className={`${styles.input} ${fieldErrors.password ? styles.inputError : ''}`}
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Your password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className={styles.toggleBtn}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
               {fieldErrors.password && (
                 <span className={styles.fieldError}>{fieldErrors.password}</span>
               )}

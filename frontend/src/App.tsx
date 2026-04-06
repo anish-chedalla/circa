@@ -81,7 +81,7 @@ export default function App() {
           <Route
             path="/claim"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole="business_owner">
                 <ClaimBusiness />
               </ProtectedRoute>
             }

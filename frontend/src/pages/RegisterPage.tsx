@@ -59,9 +59,17 @@ function validateFields(
 
 function extractApiError(error: unknown): string {
   if (axios.isAxiosError(error)) {
+    const apiError = error.response?.data?.error;
+    if (typeof apiError === 'string' && apiError.trim()) {
+      return apiError;
+    }
     const detail = error.response?.data?.detail;
     if (typeof detail === 'string') {
       return detail;
+    }
+    const message = error.response?.data?.message;
+    if (typeof message === 'string' && message.trim()) {
+      return message;
     }
   }
   return 'An unexpected error occurred. Please try again.';
@@ -76,6 +84,8 @@ export default function RegisterPage() {
   const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
@@ -175,15 +185,25 @@ export default function RegisterPage() {
               <label className={styles.label} htmlFor="register-password">
                 Password
               </label>
-              <input
-                id="register-password"
-                className={`${styles.input} ${fieldErrors.password ? styles.inputError : ''}`}
-                type="password"
-                placeholder="Min 8 chars, at least one digit"
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div className={styles.passwordRow}>
+                <input
+                  id="register-password"
+                  className={`${styles.input} ${fieldErrors.password ? styles.inputError : ''}`}
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Min 8 chars, at least one digit"
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className={styles.toggleBtn}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
               {fieldErrors.password && <span className={styles.fieldError}>{fieldErrors.password}</span>}
             </div>
 
@@ -191,15 +211,25 @@ export default function RegisterPage() {
               <label className={styles.label} htmlFor="register-confirm">
                 Confirm Password
               </label>
-              <input
-                id="register-confirm"
-                className={`${styles.input} ${fieldErrors.confirmPassword ? styles.inputError : ''}`}
-                type="password"
-                placeholder="Re-enter your password"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
+              <div className={styles.passwordRow}>
+                <input
+                  id="register-confirm"
+                  className={`${styles.input} ${fieldErrors.confirmPassword ? styles.inputError : ''}`}
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="Re-enter your password"
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className={styles.toggleBtn}
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                >
+                  {showConfirmPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
               {fieldErrors.confirmPassword && (
                 <span className={styles.fieldError}>{fieldErrors.confirmPassword}</span>
               )}

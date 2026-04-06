@@ -12,8 +12,10 @@ from backend.database import get_db
 from backend.models.business import Business
 from backend.models.business_claim import BusinessClaim
 from backend.utils.auth import get_current_user
+from backend.utils.auth import require_role
 
 router = APIRouter(prefix="/api/claims", tags=["claims"])
+_owner_only = Depends(require_role("business_owner"))
 
 
 class SubmitClaimRequest(BaseModel):
@@ -40,6 +42,7 @@ def _serialize_claim(claim: BusinessClaim, business: Business | None = None) -> 
 def search_unclaimed(
     name: str = Query(..., min_length=1),
     db: Session = Depends(get_db),
+    _=_owner_only,
 ):
     """Return up to 10 unclaimed businesses matching the given name query."""
     results = (
@@ -68,6 +71,7 @@ def submit_claim(
     body: SubmitClaimRequest,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
+    _=_owner_only,
 ):
     """Submit a claim request for an unclaimed business."""
     biz = db.query(Business).filter_by(id=body.business_id).first()

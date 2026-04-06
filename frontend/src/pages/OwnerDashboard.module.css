@@ -59,6 +59,22 @@
   background: #2f3ea1;
 }
 
+.secondaryLink {
+  text-decoration: none;
+  background: #ffffff;
+  color: #2f3ea1;
+  font-weight: 700;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #c7d2fe;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.secondaryLink:hover {
+  background: #eef2ff;
+  border-color: #a5b4fc;
+}
+
 .selectorLabel {
   display: flex;
   flex-direction: column;
