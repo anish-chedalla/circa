@@ -70,7 +70,7 @@ export default function Navbar() {
             className={styles.brand}
             end
           >
-            <img src="/acirca_icon_v6.svg" alt="" className={styles.brandIcon} />
+            <img src="/circa_c_icon_gap90.svg" alt="" className={styles.brandIcon} />
             <span className={styles.brandWord}>Circa</span>
             {isOwnerWorkspace && <span className={styles.ownerTag}>for Owners</span>}
             {isAdminWorkspace && <span className={styles.adminTag}>Admin</span>}

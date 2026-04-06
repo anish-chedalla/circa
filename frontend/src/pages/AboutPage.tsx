@@ -29,25 +29,25 @@ const teamMembers = [
     name: 'Anish Chedalla',
     title: 'Founder',
     image: anishImage,
-    position: '50% 28%',
+    position: '50% 48%',
     quote:
-      'We built Circa because we love helping people discover and support the local communities around them.',
-  },
-  {
-    name: 'Adhyyan Ranjan',
-    title: 'Founder',
-    image: adhyyanImage,
-    position: '56% 44%',
-    quote:
-      'We built Circa because we love helping people discover and support the local communities around them.',
+      'We built Circa because so many incredible local businesses go unnoticed. Technology should make communities more connected, not more distant. Circa helps people discover the places around them that make their neighborhoods unique.',
   },
   {
     name: 'Gauri Gulati',
     title: 'Founder',
     image: gauriImage,
-    position: '42% 38%',
+    position: '90% 38%',
     quote:
-      'We built Circa because we love helping people discover and support the local communities around them.',
+      'Communities are built through shared spaces, local shops, and everyday interactions. Circa was created to strengthen those connections by helping people explore their surroundings and engage with the businesses that shape their neighborhoods.',
+  },
+  {
+    name: 'Adhyyan Ranjan',
+    title: 'Founder',
+    image: adhyyanImage,
+    position: '56% 04%',
+    quote:
+      'Small businesses are the backbone of every community, but they often struggle to compete with large platforms. Circa is about giving local businesses better visibility and giving people an easier way to support the places around them.',
   },
 ];
 
