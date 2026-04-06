@@ -19,6 +19,7 @@ export default function Navbar() {
   const { slot } = useNavbarSlot();
   const location = useLocation();
   const isOwnerWorkspace = location.pathname.startsWith('/owner/');
+  const isAdminWorkspace = location.pathname.startsWith('/admin');
   const isMapRoute = location.pathname === '/' && !isOwnerWorkspace;
   const canUseOwnerWorkspace = user?.role === 'business_owner' || user?.role === 'admin';
   const [showMapTopNav, setShowMapTopNav] = useState(false);
@@ -64,13 +65,18 @@ export default function Navbar() {
 
       <div className={styles.headerGroup}>
         <div className={styles.topRow}>
-          <NavLink to={isOwnerWorkspace ? '/owner/dashboard' : '/'} className={styles.brand} end>
+          <NavLink
+            to={isOwnerWorkspace ? '/owner/dashboard' : isAdminWorkspace ? '/admin' : '/'}
+            className={styles.brand}
+            end
+          >
             <img src="/acirca_icon_v6.svg" alt="" className={styles.brandIcon} />
             <span className={styles.brandWord}>Circa</span>
             {isOwnerWorkspace && <span className={styles.ownerTag}>for Owners</span>}
+            {isAdminWorkspace && <span className={styles.adminTag}>Admin</span>}
           </NavLink>
 
-          {!isOwnerWorkspace && (
+          {!isOwnerWorkspace && !isAdminWorkspace && (
             <ul className={styles.links}>
               <li><NavLink to="/" className={activeClass} end>Map</NavLink></li>
               <li><NavLink to="/analytics" className={activeClass}>Analytics</NavLink></li>
@@ -88,15 +94,11 @@ export default function Navbar() {
               {!user && (
                 <li><NavLink to="/login" className={activeClass}>Login</NavLink></li>
               )}
-
-              {user && (
-                <li><NavLink to="/profile" className={activeClass}>Profile</NavLink></li>
-              )}
             </ul>
           )}
 
           {user && (
-            <div className={`${styles.userSection} ${isOwnerWorkspace ? styles.ownerActions : ''}`}>
+            <div className={`${styles.userSection} ${isOwnerWorkspace || isAdminWorkspace ? styles.ownerActions : ''}`}>
               {isOwnerWorkspace && (
                 <NavLink to="/" className={`${styles.navLink} ${styles.userViewBtn}`}>
                   Back to user view

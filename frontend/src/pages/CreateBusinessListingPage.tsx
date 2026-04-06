@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { CircleMarker, MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
 
-import { post } from '../services/api';
+import { get, post, put } from '../services/api';
 import type { ApiResponse } from '../types';
-import MiniMap from '../components/MiniMap';
 import styles from './CreateBusinessListingPage.module.css';
 
 type Hours = Record<string, string>;
@@ -25,9 +25,24 @@ const STATES = [
   'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
   'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
 ];
+const MAP_DEFAULT: [number, number] = [33.4484, -112.0740];
 
 interface OwnerListing {
   id: number;
+  name: string;
+  category: string;
+  address: string | null;
+  city: string;
+  state: string | null;
+  zip: string | null;
+  lat: number | null;
+  lng: number | null;
+  phone: string | null;
+  website: string | null;
+  description: string | null;
+  hours: Record<string, string> | null;
+  listing_status: string;
+  rejection_reason?: string | null;
 }
 
 interface DayHours {
@@ -57,9 +72,43 @@ function buildTimeOptions(): string[] {
 
 const TIME_OPTIONS = buildTimeOptions();
 
+function parseHours(hours: Record<string, string> | null): Record<string, DayHours> {
+  const result: Record<string, DayHours> = Object.fromEntries(DAYS.map((d) => [d, { ...DEFAULT_DAY_HOURS }]));
+  if (!hours) return result;
+  for (const day of DAYS) {
+    const value = hours[day];
+    if (!value) continue;
+    if (value.toLowerCase() === 'closed') {
+      result[day] = { ...result[day], isClosed: true };
+      continue;
+    }
+    const [open, close] = value.split(' - ');
+    if (open && close) {
+      result[day] = { isClosed: false, open, close };
+    }
+  }
+  return result;
+}
+
+interface PickerProps {
+  position: [number, number];
+  onPick: (lat: number, lng: number) => void;
+}
+
+function MapPicker({ position, onPick }: PickerProps) {
+  useMapEvents({
+    click(event) {
+      onPick(event.latlng.lat, event.latlng.lng);
+    },
+  });
+  return <CircleMarker center={position} radius={8} pathOptions={{ color: '#3b4cc0', fillColor: '#3b4cc0', fillOpacity: 0.8 }} />;
+}
+
 export default function CreateBusinessListingPage() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [loadingDraft, setLoadingDraft] = useState(true);
+  const [draft, setDraft] = useState<OwnerListing | null>(null);
 
   const [name, setName] = useState('');
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -70,15 +119,37 @@ export default function CreateBusinessListingPage() {
   const [phone, setPhone] = useState('');
   const [website, setWebsite] = useState('');
   const [description, setDescription] = useState('');
+  const [selectedLat, setSelectedLat] = useState(MAP_DEFAULT[0]);
+  const [selectedLng, setSelectedLng] = useState(MAP_DEFAULT[1]);
+  const [mapResolving, setMapResolving] = useState(false);
 
   const [hoursByDay, setHoursByDay] = useState<Record<string, DayHours>>(
     Object.fromEntries(DAYS.map((d) => [d, { ...DEFAULT_DAY_HOURS }])),
   );
 
-  const [previewLat, setPreviewLat] = useState<number | null>(null);
-  const [previewLng, setPreviewLng] = useState<number | null>(null);
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const [previewError, setPreviewError] = useState('');
+  useEffect(() => {
+    get<ApiResponse<OwnerListing>>('/owner/listing')
+      .then((resp) => {
+        if (!resp.data) return;
+        const listing = resp.data;
+        setDraft(listing);
+        setName(listing.name ?? '');
+        setCategory(listing.category ?? CATEGORIES[0]);
+        setAddress(listing.address ?? '');
+        setCity(listing.city ?? '');
+        setState(listing.state ?? 'AZ');
+        setZip(listing.zip ?? '');
+        setPhone(listing.phone ?? '');
+        setWebsite(listing.website ?? '');
+        setDescription(listing.description ?? '');
+        setHoursByDay(parseHours(listing.hours));
+        if (listing.lat !== null && listing.lng !== null) {
+          setSelectedLat(listing.lat);
+          setSelectedLng(listing.lng);
+        }
+      })
+      .finally(() => setLoadingDraft(false));
+  }, []);
 
   const standardizedHours = useMemo(() => {
     const result: Hours = {};
@@ -93,30 +164,26 @@ export default function CreateBusinessListingPage() {
     setHoursByDay((prev) => ({ ...prev, [day]: { ...prev[day], ...value } }));
   }
 
-  async function previewLocation() {
-    setPreviewError('');
-    setPreviewLoading(true);
+  async function handleMapPick(lat: number, lng: number) {
+    setSelectedLat(lat);
+    setSelectedLng(lng);
+    setMapResolving(true);
+    setError('');
     try {
-      const resp = await post<ApiResponse<{ lat: number; lng: number }>>('/owner/geocode-preview', {
-        address: address || null,
-        city,
-        state,
-        zip: zip || null,
-      });
-      if (resp.error || !resp.data) {
-        setPreviewError(resp.error ?? 'Unable to preview this location.');
-        setPreviewLat(null);
-        setPreviewLng(null);
-        return;
+      const resp = await post<ApiResponse<{ address: string | null; city: string; state: string; zip: string | null }>>(
+        '/owner/reverse-geocode',
+        { lat, lng },
+      );
+      if (resp.data) {
+        setAddress(resp.data.address ?? '');
+        setCity(resp.data.city ?? '');
+        setState(resp.data.state ?? 'AZ');
+        setZip(resp.data.zip ?? '');
       }
-      setPreviewLat(resp.data.lat);
-      setPreviewLng(resp.data.lng);
     } catch {
-      setPreviewError('Unable to preview this location.');
-      setPreviewLat(null);
-      setPreviewLng(null);
+      setError('Could not reverse-populate address from selected map point.');
     } finally {
-      setPreviewLoading(false);
+      setMapResolving(false);
     }
   }
 
@@ -128,50 +195,70 @@ export default function CreateBusinessListingPage() {
       return;
     }
 
+    const payload = {
+      name,
+      category,
+      address: address || null,
+      city,
+      state,
+      zip: zip || null,
+      lat: selectedLat,
+      lng: selectedLng,
+      phone: phone || null,
+      website: website || null,
+      description: description || null,
+      hours: standardizedHours,
+    };
+
     try {
-      const resp = await post<ApiResponse<OwnerListing>>('/owner/listing', {
-        name,
-        category,
-        address: address || null,
-        city,
-        state,
-        zip: zip || null,
-        phone: phone || null,
-        website: website || null,
-        description: description || null,
-        hours: standardizedHours,
-      });
+      const resp = draft
+        ? await put<ApiResponse<OwnerListing>>(`/owner/listing/${draft.id}/resubmit`, payload)
+        : await post<ApiResponse<OwnerListing>>('/owner/listing', payload);
       if (resp.error) {
         setError(resp.error);
         return;
       }
-      setMessage('Listing submitted. Admin approval is required before it goes live.');
-      setName('');
-      setCategory(CATEGORIES[0]);
-      setAddress('');
-      setCity('');
-      setState('AZ');
-      setZip('');
-      setPhone('');
-      setWebsite('');
-      setDescription('');
-      setHoursByDay(Object.fromEntries(DAYS.map((d) => [d, { ...DEFAULT_DAY_HOURS }])));
-      setPreviewLat(null);
-      setPreviewLng(null);
-      setPreviewError('');
+      setMessage(draft ? 'Revisions submitted for admin review.' : 'Listing submitted for admin review.');
+      if (resp.data) setDraft(resp.data);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setError(msg ?? 'Failed to submit listing.');
     }
   }
 
+  if (loadingDraft) {
+    return <main className={styles.page}><div className={styles.container}>Loading...</div></main>;
+  }
+
   return (
     <main className={styles.page}>
       <div className={styles.container}>
-        <h1 className={styles.title}>Create your business listing</h1>
+        <h1 className={styles.title}>{draft ? 'Revise your business listing' : 'Create your business listing'}</h1>
         <p className={styles.subtitle}>
-          Fill out your business details. Use preview map to verify your location before submitting.
+          Select location on map first. Address fields auto-populate so your listing appears in the correct place.
         </p>
+
+        {draft?.listing_status === 'rejected' && draft.rejection_reason && (
+          <div className={styles.error}>
+            <strong>Rejected:</strong> {draft.rejection_reason}
+          </div>
+        )}
+
+        <section className={styles.previewSection}>
+          <div className={styles.previewHeader}>
+            <h2>Pick Business Location</h2>
+            {mapResolving && <span className={styles.smallText}>Updating address from map...</span>}
+          </div>
+          <div className={styles.mapWrap}>
+            <MapContainer center={[selectedLat, selectedLng]} zoom={13} className={styles.map}>
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <MapPicker position={[selectedLat, selectedLng]} onPick={(lat, lng) => void handleMapPick(lat, lng)} />
+            </MapContainer>
+          </div>
+        </section>
 
         <div className={styles.formGrid}>
           <label className={styles.field}>Business Name
@@ -211,19 +298,6 @@ export default function CreateBusinessListingPage() {
             />
           </label>
         </div>
-
-        <section className={styles.previewSection}>
-          <div className={styles.previewHeader}>
-            <h2>Location Preview</h2>
-            <button className={styles.previewBtn} onClick={() => void previewLocation()} disabled={previewLoading}>
-              {previewLoading ? 'Locating...' : 'Preview on Map'}
-            </button>
-          </div>
-          {previewError && <p className={styles.error}>{previewError}</p>}
-          {previewLat !== null && previewLng !== null && (
-            <MiniMap lat={previewLat} lng={previewLng} name={name || 'Listing preview'} />
-          )}
-        </section>
 
         <section className={styles.hoursSection}>
           <h2>Hours of operation</h2>
@@ -266,7 +340,9 @@ export default function CreateBusinessListingPage() {
 
         {message && <p className={styles.success}>{message}</p>}
         {error && <p className={styles.error}>{error}</p>}
-        <button className={styles.submitBtn} onClick={() => void submitListing()}>Submit Listing</button>
+        <button className={styles.submitBtn} onClick={() => void submitListing()}>
+          {draft ? 'Submit Revisions' : 'Submit Listing'}
+        </button>
       </div>
     </main>
   );

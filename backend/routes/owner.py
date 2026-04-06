@@ -50,6 +50,8 @@ class CreateListingRequest(BaseModel):
     city: str
     state: str
     zip: str | None = None
+    lat: float | None = None
+    lng: float | None = None
     phone: str | None = None
     website: str | None = None
     description: str | None = None
@@ -62,6 +64,13 @@ class GeocodePreviewRequest(BaseModel):
     city: str
     state: str
     zip: str | None = None
+
+
+class ReverseGeocodeRequest(BaseModel):
+    """Payload for reverse geocoding from map coordinates."""
+
+    lat: float
+    lng: float
 
 
 # ---------------------------------------------------------------------------
@@ -127,7 +136,7 @@ def _serialize_business(biz: Business) -> dict:
         "lat": biz.lat, "lng": biz.lng,
         "phone": biz.phone, "website": biz.website, "description": biz.description,
         "hours": biz.hours, "avg_rating": biz.avg_rating, "review_count": biz.review_count,
-        "listing_status": biz.listing_status,
+        "listing_status": biz.listing_status, "rejection_reason": biz.rejection_reason,
     }
 
 
@@ -139,7 +148,7 @@ def _serialize_business_summary(biz: Business) -> dict:
         "category": biz.category,
         "city": biz.city,
         "state": biz.state,
-        "listing_status": biz.listing_status,
+        "listing_status": biz.listing_status, "rejection_reason": biz.rejection_reason,
         "claimed": biz.claimed,
         "created_at": biz.created_at.isoformat() if biz.created_at else None,
     }
@@ -153,7 +162,7 @@ def _serialize_listing_history(biz: Business) -> dict:
         "category": biz.category,
         "city": biz.city,
         "state": biz.state,
-        "listing_status": biz.listing_status,
+        "listing_status": biz.listing_status, "rejection_reason": biz.rejection_reason,
         "claimed": biz.claimed,
         "created_at": biz.created_at.isoformat() if biz.created_at else None,
         "updated_at": biz.updated_at.isoformat() if biz.updated_at else None,
@@ -161,8 +170,13 @@ def _serialize_listing_history(biz: Business) -> dict:
 
 
 def _owner_listing(db: Session, user_id: int) -> Business | None:
-    """Return the single listing created by this owner account, if any."""
-    return db.query(Business).filter(Business.owner_id == user_id).first()
+    """Return the most recently updated listing created by this owner account, if any."""
+    return (
+        db.query(Business)
+        .filter(Business.owner_id == user_id)
+        .order_by(Business.updated_at.desc(), Business.id.desc())
+        .first()
+    )
 
 
 def _build_owner_analytics(
@@ -238,6 +252,39 @@ def _geocode_listing_address(
         return float(payload[0]["lat"]), float(payload[0]["lon"])
     except Exception:
         return None, None
+
+
+def _reverse_geocode_listing(lat: float, lng: float) -> dict | None:
+    """Reverse geocode map coordinates into address parts."""
+    try:
+        with httpx.Client(timeout=8.0) as client:
+            response = client.get(
+                "https://nominatim.openstreetmap.org/reverse",
+                params={"lat": lat, "lon": lng, "format": "jsonv2", "addressdetails": 1},
+                headers={"User-Agent": "circa-owner-listings/1.0"},
+            )
+        if response.status_code != 200:
+            return None
+        payload = response.json()
+        address = payload.get("address", {})
+        city = address.get("city") or address.get("town") or address.get("village")
+        state = address.get("state")
+        postcode = address.get("postcode")
+        road = address.get("road")
+        house_number = address.get("house_number")
+        line = " ".join(part for part in [house_number, road] if part).strip() or None
+        if not city or not state:
+            return None
+        return {
+            "address": line,
+            "city": city,
+            "state": state[:2].upper() if len(state) >= 2 else state.upper(),
+            "zip": postcode,
+            "lat": lat,
+            "lng": lng,
+        }
+    except Exception:
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -349,7 +396,10 @@ def create_owner_listing(
     if len(state) != 2:
         return JSONResponse(status_code=400, content={"data": None, "error": "State must be a 2-letter code"})
 
-    lat, lng = _geocode_listing_address(body.address, body.city.strip(), state, body.zip)
+    lat = body.lat
+    lng = body.lng
+    if lat is None or lng is None:
+        lat, lng = _geocode_listing_address(body.address, body.city.strip(), state, body.zip)
 
     biz = Business(
         name=body.name.strip(),
@@ -374,6 +424,66 @@ def create_owner_listing(
     return {"data": _serialize_business(biz), "error": None}
 
 
+@router.put("/listing/{listing_id}/resubmit")
+def resubmit_owner_listing(
+    listing_id: int,
+    body: CreateListingRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Update an owner listing and resubmit it for admin review."""
+    listing = (
+        db.query(Business)
+        .filter(Business.id == listing_id, Business.owner_id == current_user.id)
+        .first()
+    )
+    if not listing:
+        return JSONResponse(status_code=404, content={"data": None, "error": "Listing not found"})
+
+    state = body.state.strip().upper()
+    if len(state) != 2:
+        return JSONResponse(status_code=400, content={"data": None, "error": "State must be a 2-letter code"})
+    if body.category not in (
+        "Restaurants",
+        "Coffee Shops",
+        "Retail/Shopping",
+        "Health & Wellness",
+        "Arts & Entertainment",
+        "Professional Services",
+        "Home Services",
+        "Fitness & Recreation",
+    ):
+        return JSONResponse(status_code=400, content={"data": None, "error": "Invalid category"})
+    if body.phone and not _PHONE_RE.match(body.phone):
+        return JSONResponse(status_code=400, content={"data": None, "error": "Invalid phone format"})
+    if body.website and not _URL_RE.match(body.website):
+        return JSONResponse(status_code=400, content={"data": None, "error": "Invalid website URL"})
+
+    lat = body.lat
+    lng = body.lng
+    if lat is None or lng is None:
+        lat, lng = _geocode_listing_address(body.address, body.city.strip(), state, body.zip)
+
+    listing.name = body.name.strip()
+    listing.category = body.category
+    listing.address = body.address
+    listing.city = body.city.strip()
+    listing.state = state
+    listing.zip = body.zip
+    listing.lat = lat
+    listing.lng = lng
+    listing.phone = body.phone
+    listing.website = body.website
+    listing.description = body.description
+    listing.hours = body.hours
+    listing.listing_status = "pending"
+    listing.rejection_reason = None
+
+    db.commit()
+    db.refresh(listing)
+    return {"data": _serialize_business(listing), "error": None}
+
+
 @router.post("/geocode-preview")
 def geocode_preview(body: GeocodePreviewRequest, current_user=Depends(get_current_user)):
     """Preview map coordinates for a draft listing address."""
@@ -391,6 +501,23 @@ def geocode_preview(body: GeocodePreviewRequest, current_user=Depends(get_curren
     if lat is None or lng is None:
         return JSONResponse(status_code=404, content={"data": None, "error": "Could not geocode this address"})
     return {"data": {"lat": lat, "lng": lng}, "error": None}
+
+
+@router.post("/reverse-geocode")
+def reverse_geocode_from_map(
+    body: ReverseGeocodeRequest,
+    current_user=Depends(get_current_user),
+):
+    """Return address fields for a selected map point."""
+    if current_user.role not in ("business_owner", "admin"):
+        return JSONResponse(
+            status_code=403,
+            content={"data": None, "error": "Business owner account required"},
+        )
+    result = _reverse_geocode_listing(body.lat, body.lng)
+    if not result:
+        return JSONResponse(status_code=404, content={"data": None, "error": "Could not reverse geocode this point"})
+    return {"data": result, "error": None}
 
 
 @router.put("/business")

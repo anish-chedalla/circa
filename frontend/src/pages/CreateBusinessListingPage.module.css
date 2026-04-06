@@ -94,6 +94,11 @@
   color: #111827;
 }
 
+.smallText {
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
 .previewBtn {
   border: 1px solid #3b4cc0;
   color: #3b4cc0;
@@ -150,6 +155,20 @@
   padding: 0.45rem 0.55rem;
   background: #ffffff;
   color: #111827;
+}
+
+.mapWrap {
+  width: 100%;
+  height: 320px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
 }
 
 .submitBtn {

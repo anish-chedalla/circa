@@ -46,6 +46,7 @@ class Business(Base):
     avg_rating: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
     review_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     listing_status: Mapped[str] = mapped_column(String(20), default="approved", nullable=False)
+    rejection_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     claimed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     owner_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=True

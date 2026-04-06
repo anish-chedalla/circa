@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -20,6 +21,12 @@ from backend.utils.auth import get_current_user, require_role
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 _admin = Depends(require_role("admin"))
+
+
+class ListingRejectRequest(BaseModel):
+    """Payload for rejecting a listing with a required reason."""
+
+    reason: str
 
 
 # ---------------------------------------------------------------------------
@@ -149,6 +156,7 @@ def list_pending_listings(db: Session = Depends(get_db), _=_admin):
                 "address": b.address,
                 "owner_id": b.owner_id,
                 "description": b.description,
+                "rejection_reason": b.rejection_reason,
                 "created_at": b.created_at.isoformat() if b.created_at else None,
             }
             for b in listings
@@ -165,20 +173,33 @@ def approve_listing(listing_id: int, db: Session = Depends(get_db), _=_admin):
         return JSONResponse(status_code=404, content={"data": None, "error": "Listing not found"})
     listing.listing_status = "approved"
     listing.claimed = True
+    listing.rejection_reason = None
     db.commit()
     return {"data": {"id": listing.id, "status": listing.listing_status}, "error": None}
 
 
 @router.post("/listings/{listing_id}/reject")
-def reject_listing(listing_id: int, db: Session = Depends(get_db), _=_admin):
+def reject_listing(
+    listing_id: int,
+    body: ListingRejectRequest,
+    db: Session = Depends(get_db),
+    _=_admin,
+):
     """Reject a pending listing."""
     listing = db.query(Business).filter_by(id=listing_id).first()
     if not listing:
         return JSONResponse(status_code=404, content={"data": None, "error": "Listing not found"})
+    reason = body.reason.strip()
+    if not reason:
+        return JSONResponse(status_code=400, content={"data": None, "error": "Rejection reason is required"})
     listing.listing_status = "rejected"
+    listing.rejection_reason = reason
     listing.claimed = False
     db.commit()
-    return {"data": {"id": listing.id, "status": listing.listing_status}, "error": None}
+    return {
+        "data": {"id": listing.id, "status": listing.listing_status, "rejection_reason": listing.rejection_reason},
+        "error": None,
+    }
 
 
 # ---------------------------------------------------------------------------

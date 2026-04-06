@@ -37,6 +37,7 @@ interface PendingListing {
   address: string | null;
   owner_id: number | null;
   description: string | null;
+  rejection_reason: string | null;
   created_at: string | null;
 }
 
@@ -118,7 +119,13 @@ export default function AdminDashboard() {
 
   async function handleListing(listingId: number, action: 'approve' | 'reject') {
     try {
-      await post(`/admin/listings/${listingId}/${action}`);
+      if (action === 'reject') {
+        const reason = window.prompt('Enter rejection reason(s) for the business owner:')?.trim() ?? '';
+        if (!reason) return;
+        await post(`/admin/listings/${listingId}/reject`, { reason });
+      } else {
+        await post(`/admin/listings/${listingId}/approve`);
+      }
       setListings((prev) => prev.filter((l) => l.id !== listingId));
       setActionMsg(`Listing ${action}d successfully.`);
       setTimeout(() => setActionMsg(''), 3000);
