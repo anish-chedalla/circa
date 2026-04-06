@@ -2,12 +2,13 @@
   max-width: 1000px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
+  background: #ffffff;
 }
 
 .title {
   font-size: 1.75rem;
   font-weight: 800;
-  color: var(--text-h, #111827);
+  color: #111827;
   margin: 0 0 1.25rem;
 }
 
@@ -25,7 +26,8 @@
   display: flex;
   gap: 0.25rem;
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid var(--border, #e5e7eb);
+  border-bottom: 2px solid #e5e7eb;
+  flex-wrap: wrap;
 }
 
 .tab {
@@ -36,7 +38,7 @@
   margin-bottom: -2px;
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--text-muted, #9ca3af);
+  color: #6b7280;
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
   display: flex;
@@ -45,7 +47,7 @@
 }
 
 .tab:hover {
-  color: var(--text-h, #374151);
+  color: #111827;
 }
 
 .activeTab {
@@ -77,34 +79,34 @@
 .table th {
   text-align: left;
   padding: 0.6rem 0.8rem;
-  background: var(--bg, #f9fafb);
-  color: var(--text-muted, #6b7280);
+  background: #f9fafb;
+  color: #6b7280;
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border, #e5e7eb);
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .table td {
   padding: 0.75rem 0.8rem;
-  border-bottom: 1px solid var(--border, #f3f4f6);
-  color: var(--text-body, #374151);
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
   vertical-align: middle;
 }
 
 .table tr:hover td {
-  background: var(--surface-hover, #f9fafb);
+  background: #f9fafb;
 }
 
 .bizCell {
   font-weight: 600;
-  color: var(--text-h, #111827) !important;
+  color: #111827 !important;
 }
 
 .reviewText {
   max-width: 240px;
-  color: var(--text-muted, #6b7280) !important;
+  color: #4b5563 !important;
   font-style: italic;
 }
 
@@ -145,7 +147,13 @@
 .status {
   padding: 2rem;
   text-align: center;
-  color: var(--text-muted, #9ca3af);
+  color: #6b7280;
   font-size: 0.9rem;
   font-style: italic;
+}
+
+.smallText {
+  color: #6b7280;
+  font-size: 0.8rem;
+  font-weight: 500;
 }

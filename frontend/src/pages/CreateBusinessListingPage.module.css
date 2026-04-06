@@ -1,0 +1,149 @@
+.page {
+  min-height: 100vh;
+  background: #ffffff;
+  padding: 2rem 0 4rem;
+}
+
+.container {
+  width: min(980px, calc(100% - 3rem));
+  margin: 0 auto;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--serif);
+  color: #111827;
+  font-size: clamp(2.1rem, 4.4vw, 3rem);
+}
+
+.subtitle {
+  margin: 0.6rem 0 1.6rem;
+  color: #4b5563;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.32rem;
+  color: #111827;
+  font-weight: 600;
+}
+
+.field input,
+.field select,
+.field textarea {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  background: #ffffff;
+  color: #111827;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: #3b4cc0;
+  box-shadow: 0 0 0 3px rgba(59, 76, 192, 0.14);
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.hoursSection {
+  margin-top: 1.6rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.hoursSection h2 {
+  margin: 0 0 0.8rem;
+  font-family: var(--serif);
+  color: #111827;
+}
+
+.hoursGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+.submitBtn {
+  margin-top: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  background: #3b4cc0;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submitBtn:hover {
+  background: #2f3ea3;
+}
+
+.success,
+.error {
+  margin: 1rem 0 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+}
+
+.success {
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.error {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.status {
+  padding: 3rem;
+  text-align: center;
+  color: #4b5563;
+}
+
+.statusPill {
+  margin: 0.8rem 0 0;
+  display: inline-block;
+  border: 1px solid #c7d2fe;
+  background: #eef1ff;
+  color: #3b4cc0;
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.summary {
+  margin: 1rem 0 0;
+  color: #111827;
+}
+
+.note {
+  color: #4b5563;
+}
+
+@media (max-width: 860px) {
+  .formGrid,
+  .hoursGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    width: min(980px, calc(100% - 2rem));
+  }
+}

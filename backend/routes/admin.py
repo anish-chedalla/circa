@@ -130,6 +130,57 @@ def list_users(db: Session = Depends(get_db), _=_admin):
     }
 
 
+@router.get("/listings/pending")
+def list_pending_listings(db: Session = Depends(get_db), _=_admin):
+    """Return pending business listings submitted by business owners."""
+    listings = (
+        db.query(Business)
+        .filter(Business.listing_status == "pending")
+        .order_by(Business.created_at.desc())
+        .all()
+    )
+    return {
+        "data": [
+            {
+                "id": b.id,
+                "name": b.name,
+                "category": b.category,
+                "city": b.city,
+                "address": b.address,
+                "owner_id": b.owner_id,
+                "description": b.description,
+                "created_at": b.created_at.isoformat() if b.created_at else None,
+            }
+            for b in listings
+        ],
+        "error": None,
+    }
+
+
+@router.post("/listings/{listing_id}/approve")
+def approve_listing(listing_id: int, db: Session = Depends(get_db), _=_admin):
+    """Approve a pending listing and publish it."""
+    listing = db.query(Business).filter_by(id=listing_id).first()
+    if not listing:
+        return JSONResponse(status_code=404, content={"data": None, "error": "Listing not found"})
+    listing.listing_status = "approved"
+    listing.claimed = True
+    db.commit()
+    return {"data": {"id": listing.id, "status": listing.listing_status}, "error": None}
+
+
+@router.post("/listings/{listing_id}/reject")
+def reject_listing(listing_id: int, db: Session = Depends(get_db), _=_admin):
+    """Reject a pending listing."""
+    listing = db.query(Business).filter_by(id=listing_id).first()
+    if not listing:
+        return JSONResponse(status_code=404, content={"data": None, "error": "Listing not found"})
+    listing.listing_status = "rejected"
+    listing.claimed = False
+    db.commit()
+    return {"data": {"id": listing.id, "status": listing.listing_status}, "error": None}
+
+
 # ---------------------------------------------------------------------------
 # Google enrichment
 # ---------------------------------------------------------------------------

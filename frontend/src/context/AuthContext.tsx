@@ -30,9 +30,11 @@ interface AuthState {
 
 interface AuthContextValue extends AuthState {
   /** Authenticate with email + password and persist the JWT. */
-  login: (email: string, password: string, captchaToken: string) => Promise<void>;
+  login: (email: string, password: string, captchaToken: string) => Promise<User>;
   /** Register a new account (with reCAPTCHA token) and persist the JWT. */
   register: (email: string, password: string, captchaToken: string) => Promise<void>;
+  /** Register a new business-owner account and persist the JWT. */
+  registerBusiness: (email: string, password: string, captchaToken: string) => Promise<void>;
   /** Clear the session and remove the stored JWT. */
   logout: () => void;
 }
@@ -104,6 +106,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.setItem('token', token);
     setState({ user, token, loading: false });
     logger.info('User logged in', user.email);
+    return user;
   }, []);
 
   /* ---------- register -------------------------------------------- */
@@ -123,6 +126,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [],
   );
 
+  /* ---------- business register ----------------------------------- */
+  const registerBusiness = useCallback(
+    async (email: string, password: string, captchaToken: string) => {
+      const resp = await post<AuthTokenResponse>('/auth/register-business', {
+        email,
+        password,
+        captcha_token: captchaToken,
+      });
+      if (resp.error || !resp.data) throw new Error(resp.error ?? 'Business registration failed');
+      const { token, user } = resp.data;
+      localStorage.setItem('token', token);
+      setState({ user, token, loading: false });
+      logger.info('Business owner registered', user.email);
+    },
+    [],
+  );
+
   /* ---------- logout ---------------------------------------------- */
   const logout = useCallback(() => {
     localStorage.removeItem('token');
@@ -132,8 +152,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /* ---------- memoised context value ------------------------------ */
   const value = useMemo<AuthContextValue>(
-    () => ({ ...state, login, register, logout }),
-    [state, login, register, logout],
+    () => ({ ...state, login, register, registerBusiness, logout }),
+    [state, login, register, registerBusiness, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

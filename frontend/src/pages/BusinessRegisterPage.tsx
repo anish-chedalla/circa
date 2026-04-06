@@ -1,0 +1,144 @@
+import { useRef, useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import ReCAPTCHA from 'react-google-recaptcha';
+import axios from 'axios';
+
+import { useAuth } from '../hooks/useAuth';
+import logger from '../services/logger';
+import styles from './BusinessRegisterPage.module.css';
+
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY as string | undefined;
+
+interface FieldErrors {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateFields(email: string, password: string, confirmPassword: string): FieldErrors {
+  const errors: FieldErrors = {};
+  if (!email.trim()) errors.email = 'Email is required.';
+  else if (!EMAIL_REGEX.test(email)) errors.email = 'Please enter a valid email address.';
+  if (!password) errors.password = 'Password is required.';
+  else if (password.length < 8 || !/\d/.test(password)) {
+    errors.password = 'Password must be at least 8 characters and include one digit.';
+  }
+  if (!confirmPassword) errors.confirmPassword = 'Please confirm your password.';
+  else if (password !== confirmPassword) errors.confirmPassword = 'Passwords do not match.';
+  return errors;
+}
+
+function extractApiError(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    return error.response?.data?.error ?? error.response?.data?.detail ?? 'Unable to create business account.';
+  }
+  return 'Unable to create business account.';
+}
+
+export default function BusinessRegisterPage() {
+  const { registerBusiness } = useAuth();
+  const navigate = useNavigate();
+  const captchaRef = useRef<ReCAPTCHA | null>(null);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [apiError, setApiError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setApiError('');
+    const errors = validateFields(email, password, confirmPassword);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+    setSubmitting(true);
+    try {
+      await registerBusiness(email, password, captchaToken ?? '');
+      navigate('/owner/new-listing', { replace: true });
+    } catch (err) {
+      const message = extractApiError(err);
+      setApiError(message);
+      logger.error('Business owner registration failed:', message);
+      captchaRef.current?.reset();
+      setCaptchaToken(null);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className={styles.wrapper}>
+      <div className={styles.card}>
+        <h1 className={styles.title}>Create a business account</h1>
+        <p className={styles.subtitle}>Submit your listing for admin approval.</p>
+        <form className={styles.form} onSubmit={handleSubmit} noValidate>
+          {apiError && <p className={styles.apiError}>{apiError}</p>}
+
+          <label className={styles.label}>
+            Email
+            <input
+              className={styles.input}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="owner@business.com"
+            />
+            {fieldErrors.email && <span className={styles.fieldError}>{fieldErrors.email}</span>}
+          </label>
+
+          <label className={styles.label}>
+            Password
+            <input
+              className={styles.input}
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 8 characters and 1 digit"
+            />
+            {fieldErrors.password && <span className={styles.fieldError}>{fieldErrors.password}</span>}
+          </label>
+
+          <label className={styles.label}>
+            Confirm Password
+            <input
+              className={styles.input}
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter password"
+            />
+            {fieldErrors.confirmPassword && (
+              <span className={styles.fieldError}>{fieldErrors.confirmPassword}</span>
+            )}
+          </label>
+
+          {RECAPTCHA_SITE_KEY ? (
+            <div className={styles.captchaWrap}>
+              <ReCAPTCHA
+                ref={captchaRef}
+                sitekey={RECAPTCHA_SITE_KEY}
+                onChange={(token) => setCaptchaToken(token)}
+                onExpired={() => setCaptchaToken(null)}
+              />
+            </div>
+          ) : (
+            <p className={styles.note}>reCAPTCHA not configured.</p>
+          )}
+
+          <button className={styles.submitBtn} type="submit" disabled={submitting}>
+            {submitting ? 'Creating account...' : 'Create business account'}
+          </button>
+        </form>
+
+        <p className={styles.footer}>
+          Already have a business account? <Link to="/business-login">Business login</Link>
+        </p>
+      </div>
+    </div>
+  );
+}

@@ -38,6 +38,8 @@ def _ensure_google_enrichment_columns() -> None:
         "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_photo_url VARCHAR(1024)",
         "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_summary TEXT",
         "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_last_synced_at TIMESTAMPTZ",
+        "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS listing_status VARCHAR(20) DEFAULT 'approved'",
+        "UPDATE businesses SET listing_status = 'approved' WHERE listing_status IS NULL",
     ]
     with engine.begin() as conn:
         for stmt in statements:

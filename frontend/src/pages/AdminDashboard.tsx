@@ -29,7 +29,18 @@ interface ReviewItem {
   created_at: string | null;
 }
 
-type Tab = 'claims' | 'reviews';
+interface PendingListing {
+  id: number;
+  name: string;
+  category: string;
+  city: string;
+  address: string | null;
+  owner_id: number | null;
+  description: string | null;
+  created_at: string | null;
+}
+
+type Tab = 'claims' | 'reviews' | 'listings';
 
 /** Format ISO date string to readable date. */
 function fmtDate(iso: string | null): string {
@@ -44,8 +55,10 @@ export default function AdminDashboard() {
   const [tab, setTab] = useState<Tab>('claims');
   const [claims, setClaims] = useState<ClaimItem[]>([]);
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const [listings, setListings] = useState<PendingListing[]>([]);
   const [claimsLoading, setClaimsLoading] = useState(true);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [listingsLoading, setListingsLoading] = useState(false);
   const [actionMsg, setActionMsg] = useState('');
 
   useEffect(() => {
@@ -65,9 +78,23 @@ export default function AdminDashboard() {
     finally { setReviewsLoading(false); }
   }
 
+  async function loadListings() {
+    if (listings.length > 0) return;
+    setListingsLoading(true);
+    try {
+      const r = await get<ApiResponse<PendingListing[]>>('/admin/listings/pending');
+      setListings(r.data ?? []);
+    } catch (err) {
+      logger.error('Failed to load listings', err);
+    } finally {
+      setListingsLoading(false);
+    }
+  }
+
   function switchTab(t: Tab) {
     setTab(t);
     if (t === 'reviews') loadReviews();
+    if (t === 'listings') loadListings();
   }
 
   async function handleClaim(claimId: number, action: 'approve' | 'reject') {
@@ -89,6 +116,17 @@ export default function AdminDashboard() {
     } catch (err) { logger.error('Failed to remove review', err); }
   }
 
+  async function handleListing(listingId: number, action: 'approve' | 'reject') {
+    try {
+      await post(`/admin/listings/${listingId}/${action}`);
+      setListings((prev) => prev.filter((l) => l.id !== listingId));
+      setActionMsg(`Listing ${action}d successfully.`);
+      setTimeout(() => setActionMsg(''), 3000);
+    } catch (err) {
+      logger.error(`Failed to ${action} listing`, err);
+    }
+  }
+
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Admin Dashboard</h1>
@@ -101,6 +139,9 @@ export default function AdminDashboard() {
         </button>
         <button className={`${styles.tab} ${tab === 'reviews' ? styles.activeTab : ''}`} onClick={() => switchTab('reviews')}>
           Review Moderation
+        </button>
+        <button className={`${styles.tab} ${tab === 'listings' ? styles.activeTab : ''}`} onClick={() => switchTab('listings')}>
+          Pending Listings {listings.length > 0 && <span className={styles.badge}>{listings.length}</span>}
         </button>
       </div>
 
@@ -145,6 +186,32 @@ export default function AdminDashboard() {
                     <td className={styles.reviewText}>{r.text ? r.text.slice(0, 60) + (r.text.length > 60 ? '…' : '') : '—'}</td>
                     <td>{fmtDate(r.created_at)}</td>
                     <td><button className={styles.rejectBtn} onClick={() => handleRemoveReview(r.id)}>Remove</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
+      {tab === 'listings' && (
+        <div className={styles.tableWrapper}>
+          {listingsLoading ? <p className={styles.status}>Loading...</p> : listings.length === 0 ? (
+            <p className={styles.status}>No pending listings.</p>
+          ) : (
+            <table className={styles.table}>
+              <thead><tr><th>Business</th><th>Location</th><th>Submitted</th><th>Description</th><th>Actions</th></tr></thead>
+              <tbody>
+                {listings.map((l) => (
+                  <tr key={l.id}>
+                    <td className={styles.bizCell}>{l.name}<br /><span className={styles.smallText}>{l.category}</span></td>
+                    <td>{l.city}{l.address ? `, ${l.address}` : ''}</td>
+                    <td>{fmtDate(l.created_at)}</td>
+                    <td className={styles.reviewText}>{l.description ? `${l.description.slice(0, 80)}${l.description.length > 80 ? '...' : ''}` : '-'}</td>
+                    <td className={styles.actionCell}>
+                      <button className={styles.approveBtn} onClick={() => handleListing(l.id, 'approve')}>Approve</button>
+                      <button className={styles.rejectBtn} onClick={() => handleListing(l.id, 'reject')}>Reject</button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

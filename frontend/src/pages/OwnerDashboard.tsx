@@ -32,9 +32,6 @@ interface OwnerBusiness {
   deals: DealItem[];
 }
 
-/**
- * Renders the owner dashboard with business editor and deal management.
- */
 export default function OwnerDashboard() {
   const [business, setBusiness] = useState<OwnerBusiness | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,7 +52,10 @@ export default function OwnerDashboard() {
   useEffect(() => {
     get<ApiResponse<OwnerBusiness>>('/owner/business')
       .then((resp) => {
-        if (!resp.data) { setNoBusiness(true); return; }
+        if (!resp.data) {
+          setNoBusiness(true);
+          return;
+        }
         setBusiness(resp.data);
         setDesc(resp.data.description ?? '');
         setPhone(resp.data.phone ?? '');
@@ -66,12 +66,20 @@ export default function OwnerDashboard() {
   }, []);
 
   async function saveBusiness() {
-    setSaveMsg(''); setSaveError('');
+    setSaveMsg('');
+    setSaveError('');
     try {
-      const resp = await put<ApiResponse<OwnerBusiness>>('/owner/business', { description: desc, phone, website });
-      if (resp.error) { setSaveError(resp.error); return; }
+      const resp = await put<ApiResponse<OwnerBusiness>>('/owner/business', {
+        description: desc,
+        phone,
+        website,
+      });
+      if (resp.error) {
+        setSaveError(resp.error);
+        return;
+      }
       if (resp.data) setBusiness({ ...business!, ...resp.data });
-      setSaveMsg('Saved successfully!');
+      setSaveMsg('Saved successfully.');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setSaveError(msg ?? 'Failed to save.');
@@ -80,17 +88,29 @@ export default function OwnerDashboard() {
   }
 
   async function postDeal() {
-    setDealMsg(''); setDealError('');
-    if (!dealTitle.trim()) { setDealError('Title is required.'); return; }
+    setDealMsg('');
+    setDealError('');
+    if (!dealTitle.trim()) {
+      setDealError('Title is required.');
+      return;
+    }
     try {
       const resp = await post<ApiResponse<DealItem>>('/owner/deals', {
-        title: dealTitle, description: dealDesc || null,
+        title: dealTitle,
+        description: dealDesc || null,
         expiry_date: dealExpiry || null,
       });
-      if (resp.error) { setDealError(resp.error); return; }
-      if (resp.data) setBusiness((prev) => prev ? { ...prev, deals: [resp.data!, ...prev.deals] } : prev);
-      setDealTitle(''); setDealDesc(''); setDealExpiry('');
-      setDealMsg('Deal posted!');
+      if (resp.error) {
+        setDealError(resp.error);
+        return;
+      }
+      if (resp.data) {
+        setBusiness((prev) => (prev ? { ...prev, deals: [resp.data!, ...prev.deals] } : prev));
+      }
+      setDealTitle('');
+      setDealDesc('');
+      setDealExpiry('');
+      setDealMsg('Deal posted.');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setDealError(msg ?? 'Failed to post deal.');
@@ -101,16 +121,19 @@ export default function OwnerDashboard() {
   async function removeDeal(dealId: number) {
     try {
       await del(`/owner/deals/${dealId}`);
-      setBusiness((prev) => prev ? { ...prev, deals: prev.deals.filter((d) => d.id !== dealId) } : prev);
-    } catch (err) { logger.error('Remove deal failed', err); }
+      setBusiness((prev) => (prev ? { ...prev, deals: prev.deals.filter((d) => d.id !== dealId) } : prev));
+    } catch (err) {
+      logger.error('Remove deal failed', err);
+    }
   }
 
-  if (loading) return <div className={styles.status}>Loading…</div>;
+  if (loading) return <div className={styles.status}>Loading...</div>;
+
   if (noBusiness || !business) {
     return (
       <div className={styles.status}>
-        <p>You haven't claimed a business yet.</p>
-        <a href="/claim" className={styles.claimLink}>Claim a Business →</a>
+        <p>You have not created a business listing yet.</p>
+        <a href="/owner/new-listing" className={styles.claimLink}>Create your listing -&gt;</a>
       </div>
     );
   }
@@ -119,8 +142,8 @@ export default function OwnerDashboard() {
     <div className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.bizName}>{business.name}</h1>
-        <span className={styles.category}>{business.category} · {business.city}</span>
-        <span className={styles.stats}>★ {business.avg_rating.toFixed(1)} · {business.review_count} reviews</span>
+        <span className={styles.category}>{business.category} | {business.city}</span>
+        <span className={styles.stats}>* {business.avg_rating.toFixed(1)} | {business.review_count} reviews</span>
       </header>
 
       <section className={styles.section}>
@@ -141,7 +164,7 @@ export default function OwnerDashboard() {
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Active Deals ({business.deals.length})</h2>
-        {business.deals.length === 0 && <p className={styles.noItems}>No active deals. Post one below!</p>}
+        {business.deals.length === 0 && <p className={styles.noItems}>No active deals. Post one below.</p>}
         {business.deals.map((deal) => (
           <div key={deal.id} className={styles.dealRow}>
             <div className={styles.dealInfo}>
@@ -159,7 +182,7 @@ export default function OwnerDashboard() {
             <input className={styles.input} value={dealTitle} onChange={(e) => setDealTitle(e.target.value)} maxLength={100} placeholder="20% Off First Visit" />
           </label>
           <label className={styles.fieldLabel}>Description
-            <textarea className={styles.textarea} rows={2} value={dealDesc} onChange={(e) => setDealDesc(e.target.value)} placeholder="Details about the deal…" />
+            <textarea className={styles.textarea} rows={2} value={dealDesc} onChange={(e) => setDealDesc(e.target.value)} placeholder="Details about the deal..." />
           </label>
           <label className={styles.fieldLabel}>Expiry Date (optional)
             <input className={styles.input} type="date" value={dealExpiry} onChange={(e) => setDealExpiry(e.target.value)} min={new Date().toISOString().split('T')[0]} />

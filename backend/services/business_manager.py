@@ -33,7 +33,11 @@ def get_categories() -> list[str]:
 
 def get_business_by_id(db: Session, business_id: int) -> Business | None:
     """Fetch a single business by its primary key, or None if not found."""
-    return db.query(Business).filter(Business.id == business_id).first()
+    return (
+        db.query(Business)
+        .filter(Business.id == business_id, Business.listing_status == "approved")
+        .first()
+    )
 
 
 def get_businesses(
@@ -48,7 +52,7 @@ def get_businesses(
     limit: int = 50,
 ) -> list[Business]:
     """Build a filtered, sorted, paginated query for businesses."""
-    query = db.query(Business)
+    query = db.query(Business).filter(Business.listing_status == "approved")
     query = _apply_filters(query, category, city, min_rating, has_deals, search)
     order_clause = _SORT_MAP.get(sort_by or "name", Business.name.asc())
     return query.order_by(order_clause).offset(skip).limit(limit).all()

@@ -38,6 +38,19 @@ class CreateDealRequest(BaseModel):
     expiry_date: date | None = None
 
 
+class CreateListingRequest(BaseModel):
+    """Payload for creating a new business listing pending admin approval."""
+    name: str
+    category: str
+    address: str | None = None
+    city: str
+    zip: str | None = None
+    phone: str | None = None
+    website: str | None = None
+    description: str | None = None
+    hours: dict | None = None
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -66,7 +79,13 @@ def _serialize_business(biz: Business) -> dict:
         "address": biz.address, "city": biz.city, "zip": biz.zip,
         "phone": biz.phone, "website": biz.website, "description": biz.description,
         "hours": biz.hours, "avg_rating": biz.avg_rating, "review_count": biz.review_count,
+        "listing_status": biz.listing_status,
     }
+
+
+def _owner_listing(db: Session, user_id: int) -> Business | None:
+    """Return the single listing created by this owner account, if any."""
+    return db.query(Business).filter(Business.owner_id == user_id).first()
 
 
 # ---------------------------------------------------------------------------
@@ -83,6 +102,73 @@ def get_owner_business(db: Session = Depends(get_db), current_user=Depends(get_c
     result = _serialize_business(biz)
     result["deals"] = [_serialize_deal(d) for d in deals]
     return {"data": result, "error": None}
+
+
+@router.get("/listing")
+def get_owner_listing(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    """Return the owner's submitted listing, including pending/rejected statuses."""
+    listing = _owner_listing(db, current_user.id)
+    if not listing:
+        return {"data": None, "error": None}
+    return {"data": _serialize_business(listing), "error": None}
+
+
+@router.post("/listing")
+def create_owner_listing(
+    body: CreateListingRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Create a new business listing for a business owner; admin must approve it."""
+    if current_user.role not in ("business_owner", "admin"):
+        return JSONResponse(
+            status_code=403,
+            content={"data": None, "error": "Business owner account required"},
+        )
+
+    existing = _owner_listing(db, current_user.id)
+    if existing:
+        return JSONResponse(
+            status_code=409,
+            content={"data": None, "error": "You already submitted a listing"},
+        )
+
+    if body.category not in (
+        "Restaurants",
+        "Coffee Shops",
+        "Retail/Shopping",
+        "Health & Wellness",
+        "Arts & Entertainment",
+        "Professional Services",
+        "Home Services",
+        "Fitness & Recreation",
+    ):
+        return JSONResponse(status_code=400, content={"data": None, "error": "Invalid category"})
+
+    if body.phone and not _PHONE_RE.match(body.phone):
+        return JSONResponse(status_code=400, content={"data": None, "error": "Invalid phone format"})
+
+    if body.website and not _URL_RE.match(body.website):
+        return JSONResponse(status_code=400, content={"data": None, "error": "Invalid website URL"})
+
+    biz = Business(
+        name=body.name.strip(),
+        category=body.category,
+        address=body.address,
+        city=body.city.strip(),
+        zip=body.zip,
+        phone=body.phone,
+        website=body.website,
+        description=body.description,
+        hours=body.hours,
+        owner_id=current_user.id,
+        claimed=False,
+        listing_status="pending",
+    )
+    db.add(biz)
+    db.commit()
+    db.refresh(biz)
+    return {"data": _serialize_business(biz), "error": None}
 
 
 @router.put("/business")

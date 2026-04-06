@@ -71,6 +71,7 @@ export default function Navbar() {
             <li><NavLink to="/" className={activeClass} end>Map</NavLink></li>
             <li><NavLink to="/analytics" className={activeClass}>Analytics</NavLink></li>
             <li><NavLink to="/about" className={activeClass}>About</NavLink></li>
+            <li><NavLink to="/promote-business" className={activeClass}>Promote your business</NavLink></li>
 
             {user?.role === 'business_owner' && (
               <li><NavLink to="/owner/dashboard" className={activeClass}>Dashboard</NavLink></li>
@@ -85,7 +86,6 @@ export default function Navbar() {
             {!user && (
               <>
                 <li><NavLink to="/login" className={activeClass}>Login</NavLink></li>
-                <li><NavLink to="/register" className={`${styles.navLink} ${styles.registerBtn}`}>Register</NavLink></li>
               </>
             )}
 

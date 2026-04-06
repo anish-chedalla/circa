@@ -119,6 +119,46 @@ async def register(body: RegisterRequest, db: Session = Depends(get_db)):
     }
 
 
+@router.post("/register-business")
+async def register_business(body: RegisterRequest, db: Session = Depends(get_db)):
+    """Create a new business-owner account and return a JWT."""
+    if not _is_recaptcha_placeholder():
+        captcha_ok = await verify_recaptcha(body.captcha_token)
+        if not captcha_ok:
+            return JSONResponse(
+                status_code=400,
+                content={"data": None, "error": "reCAPTCHA verification failed"},
+            )
+
+    if not _PASSWORD_PATTERN.match(body.password):
+        return JSONResponse(
+            status_code=400,
+            content={
+                "data": None,
+                "error": "Password must be at least 8 characters with at least one digit",
+            },
+        )
+
+    existing = db.query(User).filter(User.email == body.email).first()
+    if existing:
+        return JSONResponse(
+            status_code=409,
+            content={"data": None, "error": "Email is already registered"},
+        )
+
+    user = User(
+        email=body.email,
+        password_hash=hash_password(body.password),
+        role="business_owner",
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    token = create_jwt_token(user.id, user.email, user.role)
+    return {"data": {"token": token, "user": _user_dict(user)}, "error": None}
+
+
 @router.post("/login")
 async def login(body: LoginRequest, db: Session = Depends(get_db)):
     """Authenticate a user and return a JWT."""
