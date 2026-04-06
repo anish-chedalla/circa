@@ -93,7 +93,7 @@ export default function BusinessDetail() {
   const isRestaurantCategory = business.category.toLowerCase().includes('restaurant');
   const categoryFallbackImage = isRestaurantCategory
     ? '/about/restaurant-interior.jpg'
-    : '/about/small-business.jpg';
+    : '/small-business.jpg';
   const heroImage = business.google_photo_url || categoryFallbackImage;
   const summary = business.google_summary || business.description;
 
