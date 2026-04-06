@@ -174,9 +174,6 @@ export default function BusinessRegisterPage() {
             </button>
           </form>
 
-          <p className={styles.footer}>
-            Already have a business account? <Link to="/login">Login</Link>
-          </p>
         </div>
       </div>
     </div>

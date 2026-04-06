@@ -10,6 +10,7 @@ export interface Business {
   category: string;
   address: string | null;
   city: string;
+  state?: string | null;
   zip: string | null;
   lat: number | null;
   lng: number | null;

@@ -99,7 +99,7 @@ export default function BusinessDetail() {
         <img src={heroImage} alt={business.name} className={styles.heroImage} />
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
-          <Link to="/" className={styles.backLink}>Back to map</Link>
+          <Link to="/" className={styles.backLink}>← Back to map</Link>
           <div className={styles.titleRow}>
             <h1 className={styles.name}>{business.name}</h1>
             <button
@@ -107,6 +107,7 @@ export default function BusinessDetail() {
               onClick={toggleFavorite}
               title={isFavorited ? 'Remove from favorites' : 'Save to favorites'}
             >
+              <span className={styles.heartIcon}>{isFavorited ? '♥' : '♡'}</span>
               {isFavorited ? 'Saved' : 'Save'}
             </button>
           </div>

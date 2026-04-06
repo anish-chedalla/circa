@@ -4,6 +4,7 @@ import re
 from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta, timezone
 
+import httpx
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -47,11 +48,20 @@ class CreateListingRequest(BaseModel):
     category: str
     address: str | None = None
     city: str
+    state: str
     zip: str | None = None
     phone: str | None = None
     website: str | None = None
     description: str | None = None
     hours: dict | None = None
+
+
+class GeocodePreviewRequest(BaseModel):
+    """Payload for previewing listing coordinates from address data."""
+    address: str | None = None
+    city: str
+    state: str
+    zip: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -113,7 +123,8 @@ def _serialize_business(biz: Business) -> dict:
     """Serialize a Business ORM object for the owner dashboard."""
     return {
         "id": biz.id, "name": biz.name, "category": biz.category,
-        "address": biz.address, "city": biz.city, "zip": biz.zip,
+        "address": biz.address, "city": biz.city, "state": biz.state, "zip": biz.zip,
+        "lat": biz.lat, "lng": biz.lng,
         "phone": biz.phone, "website": biz.website, "description": biz.description,
         "hours": biz.hours, "avg_rating": biz.avg_rating, "review_count": biz.review_count,
         "listing_status": biz.listing_status,
@@ -127,6 +138,7 @@ def _serialize_business_summary(biz: Business) -> dict:
         "name": biz.name,
         "category": biz.category,
         "city": biz.city,
+        "state": biz.state,
         "listing_status": biz.listing_status,
         "claimed": biz.claimed,
         "created_at": biz.created_at.isoformat() if biz.created_at else None,
@@ -140,6 +152,7 @@ def _serialize_listing_history(biz: Business) -> dict:
         "name": biz.name,
         "category": biz.category,
         "city": biz.city,
+        "state": biz.state,
         "listing_status": biz.listing_status,
         "claimed": biz.claimed,
         "created_at": biz.created_at.isoformat() if biz.created_at else None,
@@ -159,7 +172,7 @@ def _build_owner_analytics(
 ) -> dict:
     """Aggregate tracked business events into chart-ready owner analytics."""
     now = datetime.now(timezone.utc)
-    since = now - timedelta(days=days)
+    since = now - timedelta(days=days - 1)
     events = (
         db.query(BusinessEvent)
         .filter(BusinessEvent.business_id == business_id, BusinessEvent.created_at >= since)
@@ -196,6 +209,35 @@ def _build_owner_analytics(
         "daily_events": daily_events,
         "by_event_type": by_type,
     }
+
+
+def _geocode_listing_address(
+    address: str | None,
+    city: str,
+    state: str,
+    zip_code: str | None,
+) -> tuple[float | None, float | None]:
+    """Best-effort geocode via Nominatim; returns (None, None) when unavailable."""
+    parts = [part for part in [address, city, state, zip_code, "USA"] if part]
+    query = ", ".join(parts)
+    if not query.strip():
+        return None, None
+
+    try:
+        with httpx.Client(timeout=8.0) as client:
+            response = client.get(
+                "https://nominatim.openstreetmap.org/search",
+                params={"q": query, "format": "json", "limit": 1},
+                headers={"User-Agent": "circa-owner-listings/1.0"},
+            )
+        if response.status_code != 200:
+            return None, None
+        payload = response.json()
+        if not payload:
+            return None, None
+        return float(payload[0]["lat"]), float(payload[0]["lon"])
+    except Exception:
+        return None, None
 
 
 # ---------------------------------------------------------------------------
@@ -303,12 +345,21 @@ def create_owner_listing(
     if body.website and not _URL_RE.match(body.website):
         return JSONResponse(status_code=400, content={"data": None, "error": "Invalid website URL"})
 
+    state = body.state.strip().upper()
+    if len(state) != 2:
+        return JSONResponse(status_code=400, content={"data": None, "error": "State must be a 2-letter code"})
+
+    lat, lng = _geocode_listing_address(body.address, body.city.strip(), state, body.zip)
+
     biz = Business(
         name=body.name.strip(),
         category=body.category,
         address=body.address,
         city=body.city.strip(),
+        state=state,
         zip=body.zip,
+        lat=lat,
+        lng=lng,
         phone=body.phone,
         website=body.website,
         description=body.description,
@@ -321,6 +372,25 @@ def create_owner_listing(
     db.commit()
     db.refresh(biz)
     return {"data": _serialize_business(biz), "error": None}
+
+
+@router.post("/geocode-preview")
+def geocode_preview(body: GeocodePreviewRequest, current_user=Depends(get_current_user)):
+    """Preview map coordinates for a draft listing address."""
+    if current_user.role not in ("business_owner", "admin"):
+        return JSONResponse(
+            status_code=403,
+            content={"data": None, "error": "Business owner account required"},
+        )
+
+    state = body.state.strip().upper()
+    if len(state) != 2:
+        return JSONResponse(status_code=400, content={"data": None, "error": "State must be a 2-letter code"})
+
+    lat, lng = _geocode_listing_address(body.address, body.city.strip(), state, body.zip)
+    if lat is None or lng is None:
+        return JSONResponse(status_code=404, content={"data": None, "error": "Could not geocode this address"})
+    return {"data": {"lat": lat, "lng": lng}, "error": None}
 
 
 @router.put("/business")

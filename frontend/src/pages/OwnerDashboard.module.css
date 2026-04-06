@@ -121,6 +121,12 @@
   height: 290px;
 }
 
+.chartNote {
+  margin: 0.25rem 0 0.45rem;
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
 .sectionTitle {
   margin: 0;
   font-size: 1.05rem;

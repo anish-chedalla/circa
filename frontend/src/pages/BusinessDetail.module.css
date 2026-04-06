@@ -77,10 +77,23 @@
   border-radius: 999px;
   font-size: 0.85rem;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .bookmarked {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.2);
+  color: #fecdd3;
+  border-color: #fecdd3;
+}
+
+.heartIcon {
+  color: #ffffff;
+}
+
+.bookmarked .heartIcon {
+  color: #ef4444;
 }
 
 .meta {

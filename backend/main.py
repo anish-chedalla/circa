@@ -50,6 +50,7 @@ def _ensure_google_enrichment_columns() -> None:
         "CREATE INDEX IF NOT EXISTS ix_business_events_created_at ON business_events (created_at)",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name VARCHAR(120)",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image_url VARCHAR(1024)",
+        "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS state VARCHAR(10)",
         "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_place_id VARCHAR(128)",
         "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_photo_ref VARCHAR(512)",
         "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_photo_url VARCHAR(1024)",

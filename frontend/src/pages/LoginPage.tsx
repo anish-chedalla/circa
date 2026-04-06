@@ -196,16 +196,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className={styles.footer}>
-            Don&apos;t have an account?{' '}
-            <Link className={styles.footerLink} to="/register">
-              User register
-            </Link>{' '}
-            or{' '}
-            <Link className={styles.footerLink} to="/business-register">
-              Owner register
-            </Link>
-          </p>
         </div>
       </div>
     </div>

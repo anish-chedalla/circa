@@ -225,12 +225,6 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <p className={styles.footer}>
-            Already have an account?{' '}
-            <Link className={styles.footerLink} to="/login">
-              Login
-            </Link>
-          </p>
         </div>
       </div>
     </div>

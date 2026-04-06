@@ -233,6 +233,8 @@ export default function OwnerDashboard() {
     })) ?? [];
   }, [payload?.analytics]);
 
+  const hasTrafficPoints = (analytics?.daily_events ?? []).some((point) => point.events > 0);
+
   if (loading) return <div className={styles.status}>Loading owner dashboard...</div>;
 
   if (!hasBusinesses || !selectedBusiness) {
@@ -297,6 +299,7 @@ export default function OwnerDashboard() {
                 <Line type="monotone" dataKey="events" stroke="#3b4cc0" strokeWidth={2.5} dot={false} />
               </LineChart>
             </ResponsiveContainer>
+            {!hasTrafficPoints && <p className={styles.chartNote}>No traffic data yet for this date window.</p>}
           </div>
         </article>
 

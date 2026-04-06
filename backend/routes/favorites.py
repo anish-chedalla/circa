@@ -32,6 +32,7 @@ def _serialize_business(biz: Business, favorited: bool = True) -> dict:
         "category": biz.category,
         "address": biz.address,
         "city": biz.city,
+        "state": biz.state,
         "zip": biz.zip,
         "lat": biz.lat,
         "lng": biz.lng,
