@@ -91,6 +91,10 @@ export default function Navbar() {
                 <li><NavLink to="/admin" className={activeClass}>Admin</NavLink></li>
               )}
 
+              {user && (
+                <li><NavLink to="/profile" className={activeClass}>Profile</NavLink></li>
+              )}
+
               {!user && (
                 <li><NavLink to="/login" className={activeClass}>Login</NavLink></li>
               )}
