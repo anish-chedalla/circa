@@ -1,7 +1,7 @@
 import styles from './AboutPage.module.css';
 import anishImage from '../assets/founder-pics/Anish.jpeg';
 import adhyyanImage from '../assets/founder-pics/Adhyyan.jpeg';
-import gauriImage from '../assets/founder-pics/Gauri.jpeg';
+import gauriImage from '../assets/founder-pics/Gauri2.jpeg';
 
 const steps = [
   {
