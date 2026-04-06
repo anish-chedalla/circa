@@ -251,6 +251,8 @@ def _serialize_claim(claim: BusinessClaim, db: Session) -> dict:
         "user_id": claim.user_id,
         "user_email": user[0] if user else None,
         "status": claim.status,
+        "claim_message": claim.claim_message,
+        "proof_document_urls": claim.proof_document_urls or [],
         "submitted_at": claim.submitted_at.isoformat() if claim.submitted_at else None,
         "reviewed_at": claim.reviewed_at.isoformat() if claim.reviewed_at else None,
     }

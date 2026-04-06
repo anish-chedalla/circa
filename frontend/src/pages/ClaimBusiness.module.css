@@ -111,6 +111,77 @@
   background: #1d4ed8;
 }
 
+.claimForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 300px;
+}
+
+.fieldLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  color: #374151;
+  font-weight: 600;
+  width: 100%;
+}
+
+.messageInput {
+  width: 100%;
+  min-height: 74px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.82rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.messageInput:focus,
+.docInput:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+
+.docInput {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.42rem 0.48rem;
+  background: #ffffff;
+  font-size: 0.8rem;
+}
+
+.docCount {
+  margin: 0;
+  font-size: 0.74rem;
+  color: #4b5563;
+}
+
+.claimActions {
+  display: flex;
+  gap: 0.45rem;
+  justify-content: flex-end;
+}
+
+.cancelBtn {
+  padding: 0.45rem 0.8rem;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancelBtn:hover {
+  background: #e5e7eb;
+}
+
 .successMsg {
   font-size: 0.8rem;
   color: #15803d;

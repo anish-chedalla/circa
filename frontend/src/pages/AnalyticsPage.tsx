@@ -43,7 +43,7 @@ export default function AnalyticsPage() {
       .slice(0, 4);
   }, [analytics]);
 
-  const heroImage = gems.find((b) => b.google_photo_url)?.google_photo_url ?? '/about/small-business.jpg';
+  const heroImage = '/about/coffee-barista2.jpg';
 
   if (loading) return <div className={styles.status}>Loading trending data...</div>;
 

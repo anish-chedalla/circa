@@ -26,6 +26,10 @@ export default function ClaimBusiness() {
   const [searching, setSearching] = useState(false);
   const [claimed, setClaimed] = useState<Record<number, boolean>>({});
   const [messages, setMessages] = useState<Record<number, string>>({});
+  const [activeClaimId, setActiveClaimId] = useState<number | null>(null);
+  const [claimMessage, setClaimMessage] = useState('');
+  const [claimDocs, setClaimDocs] = useState<File[]>([]);
+  const [submittingId, setSubmittingId] = useState<number | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -49,18 +53,35 @@ export default function ClaimBusiness() {
 
   /** Submit a claim for the given business. */
   async function submitClaim(businessId: number) {
+    setSubmittingId(businessId);
     try {
-      const resp = await post<ApiResponse<{ id: number }>>('/claims', { business_id: businessId });
+      const formData = new FormData();
+      formData.append('business_id', String(businessId));
+      if (claimMessage.trim()) {
+        formData.append('claim_message', claimMessage.trim());
+      }
+      for (const doc of claimDocs) {
+        formData.append('proof_documents', doc);
+      }
+
+      const resp = await post<ApiResponse<{ id: number }>>('/claims', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       if (resp.error) {
         setMessages((prev) => ({ ...prev, [businessId]: resp.error! }));
         return;
       }
       setClaimed((prev) => ({ ...prev, [businessId]: true }));
       setMessages((prev) => ({ ...prev, [businessId]: 'Claim submitted! An admin will review your request.' }));
+      setActiveClaimId(null);
+      setClaimMessage('');
+      setClaimDocs([]);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setMessages((prev) => ({ ...prev, [businessId]: msg ?? 'Failed to submit claim.' }));
       logger.error('Claim submission failed', err);
+    } finally {
+      setSubmittingId(null);
     }
   }
 
@@ -101,9 +122,66 @@ export default function ClaimBusiness() {
                 </p>
               )}
               {!claimed[biz.id] && (
-                <button className={styles.claimBtn} onClick={() => submitClaim(biz.id)}>
-                  Claim This Business
-                </button>
+                <>
+                  {activeClaimId === biz.id ? (
+                    <div className={styles.claimForm}>
+                      <label className={styles.fieldLabel}>
+                        Message to Admin
+                        <textarea
+                          className={styles.messageInput}
+                          placeholder="Describe your ownership (role, contact, or website linkage)."
+                          value={claimMessage}
+                          onChange={(e) => setClaimMessage(e.target.value)}
+                          maxLength={2000}
+                        />
+                      </label>
+                      <label className={styles.fieldLabel}>
+                        Proof Documents (PDF)
+                        <input
+                          className={styles.docInput}
+                          type="file"
+                          accept="application/pdf,.pdf"
+                          multiple
+                          onChange={(e) => setClaimDocs(Array.from(e.target.files ?? []))}
+                        />
+                      </label>
+                      {claimDocs.length > 0 && (
+                        <p className={styles.docCount}>{claimDocs.length} document(s) selected</p>
+                      )}
+                      <div className={styles.claimActions}>
+                        <button
+                          className={styles.claimBtn}
+                          onClick={() => void submitClaim(biz.id)}
+                          disabled={submittingId === biz.id}
+                        >
+                          {submittingId === biz.id ? 'Submitting...' : 'Submit Claim'}
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.cancelBtn}
+                          onClick={() => {
+                            setActiveClaimId(null);
+                            setClaimMessage('');
+                            setClaimDocs([]);
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      className={styles.claimBtn}
+                      onClick={() => {
+                        setActiveClaimId(biz.id);
+                        setClaimMessage('');
+                        setClaimDocs([]);
+                      }}
+                    >
+                      Claim This Business
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>

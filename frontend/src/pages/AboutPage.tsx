@@ -92,6 +92,29 @@ export default function AboutPage() {
         </div>
       </section>
 
+      <section className={styles.problemSection} aria-labelledby="problem-title">
+        <div className={styles.container}>
+          <div className={styles.sectionIntro}>
+            <p className={styles.kicker}>Our Team</p>
+            <div className={styles.kickerUnderline} aria-hidden="true" />
+          </div>
+
+          <h2 id="problem-title" className={styles.problemTitle}>
+            The Local Business Visibility Gap
+          </h2>
+
+          <p className={styles.problemBody}>
+            Small businesses make up 99.9% of all U.S. businesses, yet most
+            struggle to compete for visibility against large chains and
+            corporate platforms optimized for paid promotion. In neighborhoods
+            across America, independent shops, restaurants, and services go
+            unnoticed - not because they lack quality, but because they lack
+            reach. Circa exists to close that gap, giving local businesses a
+            platform built for community discovery, not algorithmic advertising.
+          </p>
+        </div>
+      </section>
+
       <section className={styles.contentSection} aria-labelledby="content-title">
         <div className={styles.container}>
           <div className={styles.contentGrid}>

@@ -90,7 +90,11 @@ export default function BusinessDetail() {
     );
   }
 
-  const heroImage = business.google_photo_url || '/about/small-business.jpg';
+  const isRestaurantCategory = business.category.toLowerCase().includes('restaurant');
+  const categoryFallbackImage = isRestaurantCategory
+    ? '/about/restaurant-interior.jpg'
+    : '/about/small-business.jpg';
+  const heroImage = business.google_photo_url || categoryFallbackImage;
   const summary = business.google_summary || business.description;
 
   return (

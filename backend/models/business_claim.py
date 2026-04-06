@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.database import Base
@@ -23,6 +24,8 @@ class BusinessClaim(Base):
     status: Mapped[str] = mapped_column(
         String(20), default="pending", nullable=False
     )
+    claim_message: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    proof_document_urls: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     submitted_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

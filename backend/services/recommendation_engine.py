@@ -1,43 +1,13 @@
 """
-Intelligent feature algorithms for the Circa platform.
+Recommendation and discovery scoring algorithms for Circa.
 
-=====================================================================
-Algorithm 1 — Hidden Gems Scorer
-=====================================================================
-Identifies underappreciated local businesses using three signals:
+Design approach:
+1. Query helpers pull candidate rows from SQLAlchemy.
+2. Scoring helpers apply deterministic math in Python.
+3. Shared serialization keeps API payload shape consistent across features.
 
-    score = avg_rating × log10(1 + review_count) × recency_factor
-
-Where:
-    recency_factor = 1 / (1 + days_since_last_review / 30)
-
-Rationale:
-  - avg_rating      : base quality signal — only well-rated places surface
-  - log10(1 + count): logarithmic review count so no single viral business
-                      dominates; a jump from 0→5 reviews matters more than
-                      50→55 reviews
-  - recency_factor  : decays smoothly toward 0 as the last review ages.
-                      A place reviewed yesterday scores near 1.0; one with
-                      no review in 6 months scores ≈ 0.14.
-
-Minimum threshold: 2 reviews required to qualify.
-
-=====================================================================
-Algorithm 2 — Content-Based Recommendations
-=====================================================================
-Recommends businesses based on each user's saved favorites:
-
-    score = (shared_category_count × 2) + avg_rating + (has_active_deal × 1)
-
-Where:
-  - shared_category_count: how many of the user's favorites share the
-                           candidate's category (weighted 2× to strongly
-                           favour taste profile alignment)
-  - avg_rating            : candidate quality as a decimal bonus
-  - has_active_deal       : 1-point bonus for businesses with active deals
-
-Fallback: If the user has fewer than 2 favorites, returns Hidden Gems
-results instead (city=None, same limit).
+This layout is intentionally modular so each step can be tested and tuned
+independently without changing unrelated logic.
 """
 
 import math
@@ -58,21 +28,23 @@ from backend.models.review import Review
 
 def get_hidden_gems(db: Session, city: str | None = None, limit: int = 10) -> list[dict]:
     """
-    Return the top `limit` Hidden Gem businesses scored by the formula above.
+    Return hidden-gem businesses ranked by:
+        avg_rating * log10(1 + review_count) * recency_factor
 
-    Parameters:
-        db   : SQLAlchemy session.
-        city : Optional city filter (exact match, case-sensitive).
-        limit: Maximum number of results to return.
-
-    Returns:
-        List of business dicts ordered by hidden-gems score descending.
-        Each dict includes an extra ``score`` field (2 decimal places).
+    Why this works:
+    - avg_rating rewards quality.
+    - logarithmic review term reduces domination by very high-volume businesses.
+    - recency_factor rewards currently active businesses.
     """
+    # Step 1: pull only businesses that pass the minimum threshold.
     candidates = _query_gem_candidates(db, city)
-    last_review_map = _last_review_dates(db, [b.id for b in candidates])
-    active_deal_ids = _businesses_with_active_deals(db, [b.id for b in candidates])
+    candidate_ids = [b.id for b in candidates]
 
+    # Step 2: precompute lookups once (O(n)) to avoid repeated DB calls.
+    last_review_map = _last_review_dates(db, candidate_ids)
+    active_deal_ids = _businesses_with_active_deals(db, candidate_ids)
+
+    # Step 3: score each candidate with pure helper logic.
     scored = [
         _score_gem(b, last_review_map.get(b.id), active_deal_ids)
         for b in candidates
@@ -83,22 +55,19 @@ def get_hidden_gems(db: Session, city: str | None = None, limit: int = 10) -> li
 
 def get_recommendations(db: Session, user_id: int, limit: int = 10) -> tuple[list[dict], bool]:
     """
-    Return personalised business recommendations for a user.
+    Return personalized recommendations and a fallback flag.
 
-    Parameters:
-        db     : SQLAlchemy session.
-        user_id: ID of the authenticated user.
-        limit  : Maximum number of results to return.
+    Score formula:
+        (shared_category_count * 2) + avg_rating + has_active_deal_bonus
 
-    Returns:
-        Tuple of (results list, fallback_used bool).
-        If the user has fewer than 2 favorites, falls back to Hidden Gems
-        and returns fallback_used=True.
+    If the user has fewer than 2 favorites, we intentionally fallback to
+    Hidden Gems so the UI still has useful results for new users.
     """
     fav_ids = _user_favorite_ids(db, user_id)
     if len(fav_ids) < 2:
         return get_hidden_gems(db, limit=limit), True
 
+    # Build preference profile (category frequency acts as taste vector).
     category_freq = _category_frequency(db, fav_ids)
     candidates = _recommendation_candidates(db, fav_ids)
     active_deal_ids = _businesses_with_active_deals(db, [b.id for b in candidates])
@@ -116,7 +85,12 @@ def get_recommendations(db: Session, user_id: int, limit: int = 10) -> tuple[lis
 # ---------------------------------------------------------------------------
 
 def _query_gem_candidates(db: Session, city: str | None) -> list[Business]:
-    """Return businesses with at least 2 reviews, optionally filtered by city."""
+    """
+    Return businesses eligible for hidden-gems scoring.
+
+    Review threshold is enforced in SQL (review_count >= 2) to reduce
+    unnecessary Python-side filtering.
+    """
     q = db.query(Business).filter(Business.review_count >= 2)
     if city:
         q = q.filter(Business.city == city)
@@ -124,7 +98,11 @@ def _query_gem_candidates(db: Session, city: str | None) -> list[Business]:
 
 
 def _last_review_dates(db: Session, biz_ids: list[int]) -> dict[int, datetime]:
-    """Return a map of business_id → most recent review datetime."""
+    """
+    Return map of business_id -> most recent review timestamp.
+
+    This map gives O(1) access during scoring and avoids N+1 queries.
+    """
     if not biz_ids:
         return {}
     rows = (
@@ -137,18 +115,29 @@ def _last_review_dates(db: Session, biz_ids: list[int]) -> dict[int, datetime]:
 
 
 def _score_gem(biz: Business, last_review_dt: datetime | None, active_deal_ids: set[int]) -> dict:
-    """Compute the hidden-gems score for a single business."""
+    """
+    Score a single hidden-gem candidate.
+
+    `math.log10(1 + review_count)` compresses raw volume so quality and
+    recency remain visible instead of being drowned out by popularity.
+    """
     recency = _recency_factor(last_review_dt)
     raw_score = biz.avg_rating * math.log10(1 + biz.review_count) * recency
     return _serialize_biz(biz, active_deal_ids, round(raw_score, 4))
 
 
 def _recency_factor(last_dt: datetime | None) -> float:
-    """Return a recency factor in (0, 1] based on days since last review."""
+    """
+    Convert latest review timestamp to a multiplier in [0, 1].
+
+    - None => 0.0 (no recency signal)
+    - very recent => near 1.0
+    - older => smoothly decays by days/30
+    """
     if last_dt is None:
         return 0.0
     now = datetime.now(timezone.utc)
-    # Make last_dt timezone-aware if needed
+    # Normalize naive datetimes to UTC before subtraction.
     if last_dt.tzinfo is None:
         last_dt = last_dt.replace(tzinfo=timezone.utc)
     days = max((now - last_dt).total_seconds() / 86400, 0)
@@ -160,13 +149,17 @@ def _recency_factor(last_dt: datetime | None) -> float:
 # ---------------------------------------------------------------------------
 
 def _user_favorite_ids(db: Session, user_id: int) -> list[int]:
-    """Return the list of business IDs saved by the user."""
+    """Return business IDs favorited by the user."""
     rows = db.query(Favorite.business_id).filter_by(user_id=user_id).all()
     return [r[0] for r in rows]
 
 
 def _category_frequency(db: Session, fav_ids: list[int]) -> dict[str, int]:
-    """Return a frequency map of category → count from the user's favorites."""
+    """
+    Build category -> count frequency from user's favorites.
+
+    This compact dictionary acts as the preference model used by scoring.
+    """
     businesses = db.query(Business.category).filter(Business.id.in_(fav_ids)).all()
     freq: dict[str, int] = {}
     for (cat,) in businesses:
@@ -175,14 +168,21 @@ def _category_frequency(db: Session, fav_ids: list[int]) -> dict[str, int]:
 
 
 def _recommendation_candidates(db: Session, fav_ids: list[int]) -> list[Business]:
-    """Return all businesses NOT already in the user's favorites."""
+    """Return all businesses that are not already in favorites."""
     return db.query(Business).filter(Business.id.notin_(fav_ids)).all()
 
 
 def _score_recommendation(
     biz: Business, category_freq: dict[str, int], active_deal_ids: set[int]
 ) -> dict:
-    """Compute the content-based recommendation score for a single business."""
+    """
+    Score one recommendation candidate.
+
+    Weighting is intentionally simple and explainable:
+    - category overlap is weighted heavily (`* 2`)
+    - business quality adds a continuous bonus (`avg_rating`)
+    - active deal adds a small conversion-oriented boost
+    """
     shared = category_freq.get(biz.category, 0)
     has_deal = 1 if biz.id in active_deal_ids else 0
     raw_score = (shared * 2) + biz.avg_rating + has_deal
@@ -194,7 +194,12 @@ def _score_recommendation(
 # ---------------------------------------------------------------------------
 
 def _businesses_with_active_deals(db: Session, biz_ids: list[int]) -> set[int]:
-    """Return the set of business IDs that currently have at least one active deal."""
+    """
+    Return business IDs with at least one currently-active deal.
+
+    Set return type is deliberate for O(1) membership checks during scoring
+    and serialization.
+    """
     if not biz_ids:
         return set()
     today = date.today()
@@ -212,7 +217,12 @@ def _businesses_with_active_deals(db: Session, biz_ids: list[int]) -> set[int]:
 
 
 def _serialize_biz(biz: Business, active_deal_ids: set[int], score: float) -> dict:
-    """Serialize a Business ORM object for API consumption, adding score."""
+    """
+    Serialize a business to API payload used by both algorithms.
+
+    Centralizing this shape in one helper prevents drift between hidden-gems
+    and recommendation responses over time.
+    """
     return {
         "id": biz.id,
         "name": biz.name,

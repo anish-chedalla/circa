@@ -76,6 +76,7 @@
 }
 
 .processSection,
+.problemSection,
 .contentSection,
 .teamSection {
   padding: 6rem 0;
@@ -86,6 +87,10 @@
 }
 
 .contentSection {
+  background: #ffffff;
+}
+
+.problemSection {
   background: #ffffff;
 }
 
@@ -184,6 +189,24 @@
   color: #4b5563;
 }
 
+.problemTitle {
+  margin: 1.6rem 0 0;
+  font-family: var(--serif);
+  font-size: clamp(2.4rem, 4.8vw, 3.4rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.problemBody {
+  margin: 1.6rem 0 0;
+  max-width: 760px;
+  font-size: 1.1rem;
+  line-height: 1.95;
+  color: #4b5563;
+}
+
 .teamTitle {
   margin: 2rem 0 0;
   font-family: var(--serif);
@@ -269,6 +292,7 @@
   }
 
   .processSection,
+  .problemSection,
   .contentSection,
   .teamSection {
     padding: 4.5rem 0;
@@ -288,7 +312,8 @@
   }
 
   .contentBody p,
-  .stepText {
+  .stepText,
+  .problemBody {
     font-size: 1rem;
     line-height: 1.85;
   }
