@@ -100,8 +100,22 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  flex: 1;
-  justify-content: center;
+  flex: 0 1 auto;
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+.ownerActions {
+  margin-left: auto;
+}
+
+.userViewBtn {
+  border: 1px solid #3b4cc0;
+  color: #3b4cc0;
+}
+
+.userViewBtn:hover {
+  background: #eef1ff;
 }
 
 .navLink {

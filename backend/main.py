@@ -33,6 +33,17 @@ def _ensure_google_enrichment_columns() -> None:
     Existing Supabase tables need explicit ALTER statements for new columns.
     """
     statements = [
+        """
+        CREATE TABLE IF NOT EXISTS business_events (
+            id SERIAL PRIMARY KEY,
+            business_id INTEGER NOT NULL REFERENCES businesses(id),
+            event_type VARCHAR(50) NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT NOW()
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS ix_business_events_business_id ON business_events (business_id)",
+        "CREATE INDEX IF NOT EXISTS ix_business_events_event_type ON business_events (event_type)",
+        "CREATE INDEX IF NOT EXISTS ix_business_events_created_at ON business_events (created_at)",
         "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_place_id VARCHAR(128)",
         "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_photo_ref VARCHAR(512)",
         "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS google_photo_url VARCHAR(1024)",

@@ -172,6 +172,13 @@ export default function LoginPage() {
             Register
           </Link>
         </p>
+
+        <p className={styles.footer}>
+          Trying to login as business owner?{' '}
+          <Link className={styles.footerLink} to="/business-login">
+            Business login page
+          </Link>
+        </p>
       </div>
     </div>
   );

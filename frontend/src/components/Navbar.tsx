@@ -18,7 +18,9 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const { slot } = useNavbarSlot();
   const location = useLocation();
-  const isMapRoute = location.pathname === '/';
+  const isOwnerWorkspace = location.pathname.startsWith('/owner/');
+  const isMapRoute = location.pathname === '/' && !isOwnerWorkspace;
+  const canUseOwnerWorkspace = user?.role === 'business_owner' || user?.role === 'admin';
   const [showMapTopNav, setShowMapTopNav] = useState(false);
 
   useEffect(() => {
@@ -62,43 +64,43 @@ export default function Navbar() {
 
       <div className={styles.headerGroup}>
         <div className={styles.topRow}>
-          <NavLink to="/" className={styles.brand} end>
+          <NavLink to={isOwnerWorkspace ? '/owner/dashboard' : '/'} className={styles.brand} end>
             <img src="/acirca_icon_v6.svg" alt="" className={styles.brandIcon} />
-            Circa
+            {isOwnerWorkspace ? 'Circa for Owners' : 'Circa'}
           </NavLink>
 
-          <ul className={styles.links}>
-            <li><NavLink to="/" className={activeClass} end>Map</NavLink></li>
-            <li><NavLink to="/analytics" className={activeClass}>Analytics</NavLink></li>
-            <li><NavLink to="/about" className={activeClass}>About</NavLink></li>
-            <li><NavLink to="/promote-business" className={activeClass}>Promote your business</NavLink></li>
+          {!isOwnerWorkspace && (
+            <ul className={styles.links}>
+              <li><NavLink to="/" className={activeClass} end>Map</NavLink></li>
+              <li><NavLink to="/analytics" className={activeClass}>Analytics</NavLink></li>
+              <li><NavLink to="/about" className={activeClass}>About</NavLink></li>
+              <li><NavLink to="/promote-business" className={activeClass}>Promote your business</NavLink></li>
 
-            {user?.role === 'business_owner' && (
-              <li><NavLink to="/owner/dashboard" className={activeClass}>Dashboard</NavLink></li>
-            )}
-            {user?.role === 'admin' && (
-              <>
-                <li><NavLink to="/owner/dashboard" className={activeClass}>Owner</NavLink></li>
+              {canUseOwnerWorkspace && (
+                <li><NavLink to="/owner/dashboard" className={activeClass}>Dashboard</NavLink></li>
+              )}
+
+              {user?.role === 'admin' && (
                 <li><NavLink to="/admin" className={activeClass}>Admin</NavLink></li>
-              </>
-            )}
+              )}
 
-            {!user && (
-              <>
+              {!user && (
                 <li><NavLink to="/login" className={activeClass}>Login</NavLink></li>
-              </>
-            )}
+              )}
 
-            {user && (
-              <li><NavLink to="/profile" className={activeClass}>Profile</NavLink></li>
-            )}
-          </ul>
+              {user && (
+                <li><NavLink to="/profile" className={activeClass}>Profile</NavLink></li>
+              )}
+            </ul>
+          )}
 
           {user && (
-            <div className={styles.userSection}>
-              <span className={`${styles.roleBadge} ${styles[`role_${user.role}`]}`}>
-                {user.role.replace('_', ' ')}
-              </span>
+            <div className={`${styles.userSection} ${isOwnerWorkspace ? styles.ownerActions : ''}`}>
+              {isOwnerWorkspace && (
+                <NavLink to="/" className={`${styles.navLink} ${styles.userViewBtn}`}>
+                  Back to user view
+                </NavLink>
+              )}
               <button type="button" className={styles.logoutBtn} onClick={logout}>
                 Logout
               </button>

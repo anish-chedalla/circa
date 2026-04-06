@@ -4,11 +4,13 @@ from datetime import date
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
 from backend.models.business import Business
+from backend.models.business_event import BusinessEvent
 from backend.services.business_manager import (
     ALLOWED_CATEGORIES,
     get_business_by_id,
@@ -18,6 +20,12 @@ from backend.services.business_manager import (
 from backend.services.recommendation_engine import get_hidden_gems
 
 router = APIRouter(prefix="/api/businesses", tags=["businesses"])
+
+ALLOWED_EVENTS = {"detail_view", "website_click", "save_click", "phone_click"}
+
+
+class TrackEventRequest(BaseModel):
+    event_type: str
 
 
 @router.get("")
@@ -68,7 +76,24 @@ def get_business_detail(business_id: int, db: Session = Depends(get_db)):
         return JSONResponse(
             status_code=404, content={"data": None, "error": "Business not found"}
         )
+    _record_event(db, business.id, "detail_view")
     return {"data": _serialize_business_detail(business), "error": None}
+
+
+@router.post("/{business_id}/track-event")
+def track_business_event(
+    business_id: int,
+    body: TrackEventRequest,
+    db: Session = Depends(get_db),
+):
+    """Track user engagement events for owner analytics."""
+    if body.event_type not in ALLOWED_EVENTS:
+        return JSONResponse(status_code=400, content={"data": None, "error": "Invalid event_type"})
+    business = get_business_by_id(db, business_id)
+    if not business:
+        return JSONResponse(status_code=404, content={"data": None, "error": "Business not found"})
+    _record_event(db, business.id, body.event_type)
+    return {"data": {"ok": True}, "error": None}
 
 
 # ---------------------------------------------------------------------------
@@ -160,3 +185,9 @@ def _serialize_deal(deal) -> dict:
         "expiry_date": deal.expiry_date.isoformat() if deal.expiry_date else None,
         "is_active": deal.is_active,
     }
+
+
+def _record_event(db: Session, business_id: int, event_type: str) -> None:
+    event = BusinessEvent(business_id=business_id, event_type=event_type)
+    db.add(event)
+    db.commit()

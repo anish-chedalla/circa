@@ -64,6 +64,7 @@ class Business(Base):
     deals = relationship("Deal", back_populates="business", lazy="select")
     favorites = relationship("Favorite", back_populates="business", lazy="select")
     claims = relationship("BusinessClaim", back_populates="business", lazy="select")
+    events = relationship("BusinessEvent", back_populates="business", lazy="select")
 
     def __repr__(self) -> str:
         """Return a developer-friendly string representation."""

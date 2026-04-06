@@ -94,6 +94,10 @@ export default function BusinessLoginPage() {
         <p className={styles.footer}>
           Need an owner account? <Link to="/business-register">Create business account</Link>
         </p>
+
+        <p className={styles.footer}>
+          Trying to login as user? <Link to="/login">User login page</Link>
+        </p>
       </div>
     </div>
   );

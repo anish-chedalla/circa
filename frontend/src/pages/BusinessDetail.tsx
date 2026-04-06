@@ -41,6 +41,15 @@ export default function BusinessDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  async function trackEvent(eventType: 'save_click' | 'website_click' | 'phone_click') {
+    if (!id) return;
+    try {
+      await post(`/businesses/${id}/track-event`, { event_type: eventType });
+    } catch (err) {
+      logger.warn('Failed to track business event', err);
+    }
+  }
+
   async function toggleFavorite() {
     if (!user) {
       navigate('/login');
@@ -52,6 +61,7 @@ export default function BusinessDetail() {
         setIsFavorited(false);
       } else {
         await post(`/favorites/${id}`);
+        await trackEvent('save_click');
         setIsFavorited(true);
       }
     } catch (err) {
@@ -125,13 +135,21 @@ export default function BusinessDetail() {
                 )}
                 {business.phone && (
                   <p className={styles.infoLine}>
-                    <span className={styles.label}>Phone:</span> <a href={`tel:${business.phone}`}>{business.phone}</a>
+                    <span className={styles.label}>Phone:</span>{' '}
+                    <a href={`tel:${business.phone}`} onClick={() => void trackEvent('phone_click')}>
+                      {business.phone}
+                    </a>
                   </p>
                 )}
                 {business.website && (
                   <p className={styles.infoLine}>
                     <span className={styles.label}>Website:</span>{' '}
-                    <a href={business.website} target="_blank" rel="noreferrer">
+                    <a
+                      href={business.website}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => void trackEvent('website_click')}
+                    >
                       {business.website.replace(/^https?:\/\//, '')}
                     </a>
                   </p>
