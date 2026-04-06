@@ -1,6 +1,7 @@
 import styles from './AboutPage.module.css';
-
-const BASE_URL = import.meta.env.BASE_URL;
+import anishImage from '../assets/founder-pics/Anish.jpeg';
+import adhyyanImage from '../assets/founder-pics/Adhyyan.jpeg';
+import gauriImage from '../assets/founder-pics/Gauri.jpeg';
 
 const steps = [
   {
@@ -27,7 +28,7 @@ const teamMembers = [
   {
     name: 'Anish Chedalla',
     title: 'Founder',
-    image: `${BASE_URL}founder-pics/Anish.jpeg`,
+    image: anishImage,
     position: '50% 28%',
     quote:
       'We built Circa because we love helping people discover and support the local communities around them.',
@@ -35,7 +36,7 @@ const teamMembers = [
   {
     name: 'Adhyyan Ranjan',
     title: 'Founder',
-    image: `${BASE_URL}founder-pics/Adhyyan.jpeg`,
+    image: adhyyanImage,
     position: '56% 44%',
     quote:
       'We built Circa because we love helping people discover and support the local communities around them.',
@@ -43,7 +44,7 @@ const teamMembers = [
   {
     name: 'Gauri Gulati',
     title: 'Founder',
-    image: `${BASE_URL}founder-pics/Gauri.jpeg`,
+    image: gauriImage,
     position: '42% 38%',
     quote:
       'We built Circa because we love helping people discover and support the local communities around them.',
