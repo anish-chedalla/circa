@@ -95,7 +95,7 @@ export default function AboutPage() {
       <section className={styles.problemSection} aria-labelledby="problem-title">
         <div className={styles.container}>
           <div className={styles.sectionIntro}>
-            <p className={styles.kicker}>Our Team</p>
+            <p className={styles.kicker}>What We Address</p>
             <div className={styles.kickerUnderline} aria-hidden="true" />
           </div>
 

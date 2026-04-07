@@ -18,8 +18,18 @@ import styles from './MapDiscovery.module.css';
 const DEFAULT_FILTERS: BusinessFilters = {
   category: '',
   city: '',
+  state: '',
+  zip: '',
   minRating: 0,
+  maxRating: 5,
+  minReviews: 0,
+  maxReviews: 0,
   hasDeals: false,
+  hasWebsite: false,
+  hasPhone: false,
+  hasPhoto: false,
+  hasSummary: false,
+  chainType: 'any',
   sortBy: 'name',
   search: '',
 };
@@ -35,6 +45,28 @@ function buildQuery(filters: BusinessFilters): string {
   if (filters.search) params.set('search', filters.search);
   params.set('limit', '100');
   return params.toString();
+}
+
+/** Apply client-side advanced filters beyond backend query capabilities. */
+function applyAdvancedFilters(items: Business[], filters: BusinessFilters): Business[] {
+  return items.filter((biz) => {
+    if (filters.state && (biz.state ?? '').toLowerCase() !== filters.state.toLowerCase()) return false;
+    if (filters.zip && !(biz.zip ?? '').startsWith(filters.zip.trim())) return false;
+
+    if (filters.maxRating !== undefined && filters.maxRating > 0 && biz.avg_rating > filters.maxRating) return false;
+    if (filters.minReviews !== undefined && filters.minReviews > 0 && biz.review_count < filters.minReviews) return false;
+    if (filters.maxReviews !== undefined && filters.maxReviews > 0 && biz.review_count > filters.maxReviews) return false;
+
+    if (filters.hasWebsite && !biz.website) return false;
+    if (filters.hasPhone && !biz.phone) return false;
+    if (filters.hasPhoto && !biz.google_photo_url) return false;
+    if (filters.hasSummary && !(biz.google_summary || biz.description)) return false;
+
+    if (filters.chainType === 'independent' && biz.is_chain) return false;
+    if (filters.chainType === 'chain' && !biz.is_chain) return false;
+
+    return true;
+  });
 }
 
 /**
@@ -55,7 +87,7 @@ export default function MapDiscovery() {
     setLoading(true);
     try {
       const resp = await get<ApiResponse<Business[]>>(`/businesses?${buildQuery(f)}`);
-      setBusinesses(resp.data ?? []);
+      setBusinesses(applyAdvancedFilters(resp.data ?? [], f));
     } catch (err) {
       logger.error('Failed to fetch businesses', err);
     } finally {

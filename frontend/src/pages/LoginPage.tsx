@@ -12,6 +12,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 
 import { useAuth } from '../hooks/useAuth';
 import logger from '../services/logger';
+import PasswordEyeIcon from '../components/PasswordEyeIcon';
 import styles from './LoginPage.module.css';
 
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY as
@@ -183,7 +184,7 @@ export default function LoginPage() {
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  <PasswordEyeIcon open={showPassword} />
                 </button>
               </div>
               {fieldErrors.password && (

@@ -5,6 +5,7 @@ import axios from 'axios';
 
 import { useAuth } from '../hooks/useAuth';
 import logger from '../services/logger';
+import PasswordEyeIcon from '../components/PasswordEyeIcon';
 import styles from './BusinessRegisterPage.module.css';
 
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY as string | undefined;
@@ -160,7 +161,7 @@ export default function BusinessRegisterPage() {
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  <PasswordEyeIcon open={showPassword} />
                 </button>
               </div>
               {fieldErrors.password && <span className={styles.fieldError}>{fieldErrors.password}</span>}
@@ -182,7 +183,7 @@ export default function BusinessRegisterPage() {
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
                   aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                 >
-                  {showConfirmPassword ? 'Hide' : 'Show'}
+                  <PasswordEyeIcon open={showConfirmPassword} />
                 </button>
               </div>
               {fieldErrors.confirmPassword && (

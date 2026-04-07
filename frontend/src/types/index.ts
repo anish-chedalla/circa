@@ -131,8 +131,18 @@ export interface ApiResponse<T> {
 export interface BusinessFilters {
   category: string;
   city: string;
+  state?: string;
+  zip?: string;
   minRating: number;
+  maxRating?: number;
+  minReviews?: number;
+  maxReviews?: number;
   hasDeals: boolean;
+  hasWebsite?: boolean;
+  hasPhone?: boolean;
+  hasPhoto?: boolean;
+  hasSummary?: boolean;
+  chainType?: 'any' | 'independent' | 'chain';
   sortBy: string;
   search: string;
 }

@@ -1,91 +1,77 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.5rem 1rem 0.75rem;
+}
+
 .bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.5rem 1rem;
+  gap: 0.55rem;
 }
 
 .search {
-  flex: 1 1 180px;
-  min-width: 140px;
-  padding: 0.35rem 0.7rem;
+  flex: 1 1 260px;
+  min-width: 180px;
+  padding: 0.38rem 0.72rem;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: 8px;
+  font-size: 0.86rem;
   background: #ffffff;
   color: #111827;
   outline: none;
 }
 
-.search::placeholder {
-  color: #9ca3af;
-}
-
-.search:focus {
+.search:focus,
+.select:focus,
+.input:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
 }
 
-.select {
-  padding: 0.35rem 0.7rem;
+.select,
+.input {
+  width: 100%;
+  padding: 0.36rem 0.7rem;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: 8px;
+  font-size: 0.84rem;
   background: #ffffff;
   color: #111827;
-  cursor: pointer;
   outline: none;
 }
 
-.select:focus {
-  border-color: #2563eb;
-}
-
-.sliderLabel {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
-  color: #374151;
-  white-space: nowrap;
-}
-
-.slider {
-  width: 90px;
-  accent-color: #2563eb;
-  cursor: pointer;
-}
-
-.checkLabel {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.85rem;
-  color: #374151;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.checkLabel input[type='checkbox'] {
-  accent-color: #2563eb;
-  width: 14px;
-  height: 14px;
-  cursor: pointer;
-}
-
-.gemsToggle {
-  padding: 0.35rem 0.8rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  background: #ffffff;
-  color: #374151;
+.advancedBtn,
+.gemsToggle,
+.applyBtn,
+.clearBtn {
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.advancedBtn {
+  padding: 0.36rem 0.82rem;
+  border: 1px solid #c7d2fe;
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.advancedBtn:hover {
+  background: #e0e7ff;
+}
+
+.gemsToggle {
   margin-left: auto;
+  padding: 0.36rem 0.82rem;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
 }
 
 .gemsToggle:hover {
@@ -94,12 +80,124 @@
 }
 
 .gemsActive {
+  border-color: #2563eb;
   background: #2563eb;
   color: #ffffff;
-  border-color: #2563eb;
 }
 
 .gemsActive:hover {
   background: #1d4ed8;
   color: #ffffff;
+}
+
+.advancedPanel {
+  background: #ffffff;
+  border: 1px solid #dbe4ff;
+  border-radius: 10px;
+  padding: 0.85rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.65rem 0.75rem;
+}
+
+.fieldLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+.checkLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  font-size: 0.82rem;
+  color: #374151;
+  font-weight: 600;
+  padding-top: 1.35rem;
+}
+
+.checkLabel input[type='checkbox'] {
+  width: 14px;
+  height: 14px;
+  accent-color: #2563eb;
+}
+
+.actions {
+  margin-top: 0.85rem;
+  display: flex;
+  gap: 0.55rem;
+  justify-content: flex-end;
+}
+
+.applyBtn {
+  padding: 0.42rem 0.95rem;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.applyBtn:hover {
+  background: #1d4ed8;
+}
+
+.clearBtn {
+  padding: 0.42rem 0.95rem;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+}
+
+.clearBtn:hover {
+  background: #f3f4f6;
+}
+
+@media (max-width: 1200px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .wrap {
+    padding: 0.5rem 0.75rem 0.75rem;
+  }
+
+  .gemsToggle {
+    margin-left: 0;
+  }
+
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .checkLabel {
+    padding-top: 0;
+  }
+
+  .actions {
+    justify-content: stretch;
+  }
+
+  .applyBtn,
+  .clearBtn {
+    flex: 1;
+  }
 }
